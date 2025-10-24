@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head th:replace="~{components/bootstrap :: head-bootstrap}"></head>
+<head>
+    <title>Plantillas IoT - Crear</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body{font-family: system-ui, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px;}
+        .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px;}
+        .row{display:flex; gap:12px; flex-wrap:wrap;}
+        .col{flex:1 1 260px;}
+        label{display:block; font-weight:600; margin-bottom:6px;}
+        input[type=text], select, textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
+        button,a.btn{padding:10px 16px; border:0; border-radius:10px; cursor:pointer; display:inline-block;}
+        .btn-primary{background:#0d6efd; color:white;}
+        .btn-secondary{background:#6c757d; color:white; text-decoration:none;}
+        .btn-danger{background:#dc3545; color:white;}
+        .errors{color:#b3261e; font-size:0.95rem; margin:8px 0;}
+        table{width:100%; border-collapse:collapse;}
+        th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; vertical-align:middle;}
+        th:last-child, td:last-child{width:1%; white-space:nowrap; text-align:right;}
+        .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
+        .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
+        .ok{background:#e7f7ee; color:#145d33;}
+        .err{background:#fde7e9; color:#8a1220;}
+    </style>
+</head>
+<body>
+
+<h1>Plantillas IoT</h1>
+
+<div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
+<div th:if="${error}" class="flash err" th:text="${error}"></div>
+
+<div class="card">
+    <h2>Crear plantilla</h2>
+    <form th:action="@{/plantillas}" th:object="${plantilla}" method="post">
+        <div class="row">
+            <div class="col">
+                <label for="nombre">Nombre *</label>
+                <input id="nombre" type="text" th:field="*{nombre}" placeholder="Sensor Ambiental v1" required />
+                <div class="errors" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+            </div>
+            <div class="col">
+                <label for="protocolo">Protocolo predeterminado *</label>
+                <select id="protocolo" th:field="*{protocoloPredeterminado}" required>
+                    <option th:each="p : ${protocolos}" th:value="${p}" th:text="${p}">mqtt</option>
+                </select>
+                <div class="errors" th:if="${#fields.hasErrors('protocoloPredeterminado')}" th:errors="*{protocoloPredeterminado}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col" style="flex:1 1 100%;">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" rows="3" th:field="*{descripcion}" placeholder="Texto descriptivo del modelo..."></textarea>
+                <div class="errors" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+            </div>
+        </div>
+
+        <button class="btn-primary" type="submit">Guardar</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Plantillas existentes</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Protocolo</th>
+            <th>Descripción</th>
+            <th>Creado en</th>
+            <th>Acciones</th> <!-- NUEVA COLUMNA -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${plantillas}">
+            <td>
+                <!-- Nombre clicable hacia variables -->
+                <a th:href="@{|/plantillas/${p.id}/variables|}" th:text="${p.nombre}">Nombre</a>
+            </td>
+            <td><span class="badge" th:text="${p.protocoloPredeterminado}">mqtt</span></td>
+            <td th:text="${p.descripcion}">—</td>
+            <td th:text="${p.creadoEn}">—</td>
+            <td>
+                <!-- Botón para entrar a variables -->
+                <a class="btn btn-secondary" th:href="@{|/plantillas/${p.id}/variables|}">Ver variables</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(plantillas)}">
+            <td colspan="5">Aún no hay plantillas.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
