@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{components/bootstrap :: head-bootstrap}"></head>
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body class="bg-light">
+
+<div th:replace="components/sidebar :: sidebar"></div>
+
+<!-- Contenedor principal -->
+<div class="container mt-5">
+    <!-- Título del Proyecto -->
+    <div class="text-center">
+        <h1 class="display-4 fw-bold">BAE IoT</h1>
+        <p class="lead">Sistema básico para la gestión y monitoreo de datos IoT.</p>
+    </div>
+
+    <hr>
+
+    <!-- Espacio para futuros componentes -->
+    <div class="mt-4 text-center">
+        <p class="text-muted">Aquí irá el contenido del dashboard.</p>
+    </div>
+</div>
+<!-- ✅ Scripts base de tu proyecto -->
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>

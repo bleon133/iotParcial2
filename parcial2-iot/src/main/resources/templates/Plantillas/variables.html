@@ -43,7 +43,7 @@
 
 <div class="card">
     <h2>Crear variable</h2>
-    <form th:action="@{|/plantillas/${plantilla.id}/variables|}" th:object="${nuevaVariable}" method="post">
+    <form th:action="@{|/templates/Plantillas/${plantilla.id}/variables|}" th:object="${nuevaVariable}" method="post">
         <div class="row">
             <div class="col">
                 <label for="nombre">Nombre técnico *</label>
@@ -136,7 +136,7 @@
             <td th:text="${v.precisionDecimales}">0</td>
             <td th:text="${v.muestreoMs}">1000</td>
             <td style="text-align:right;">
-                <form th:action="@{|/plantillas/${plantilla.id}/variables/${v.id}/eliminar|}" method="post"
+                <form th:action="@{|/templates/Plantillas/${plantilla.id}/variables/${v.id}/eliminar|}" method="post"
                       th:object="${v}" onsubmit="return confirm('¿Eliminar variable?');">
                     <button class="btn-danger" type="submit">Eliminar</button>
                 </form>

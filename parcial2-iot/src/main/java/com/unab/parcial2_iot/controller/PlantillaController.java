@@ -23,9 +23,10 @@ public class PlantillaController {
         model.addAttribute("plantilla", new Plantilla()); // objeto del formulario
         model.addAttribute("protocolos", Protocolo.values());
         model.addAttribute("plantillas", plantillaService.listar());
+        model.addAttribute("titulo", "Plantillas");
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
-        return "plantillas/crear"; // templates/plantillas/crear.html
+        return "Plantillas/crear"; // templates/plantillas/crear.html
     }
 
     @PostMapping
@@ -59,6 +60,6 @@ public class PlantillaController {
 
         model.addAttribute("protocolos", Protocolo.values());
         model.addAttribute("plantillas", plantillaService.listar());
-        return "plantillas/crear";
+        return "Plantillas/crear";
     }
 }

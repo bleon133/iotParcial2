@@ -37,9 +37,10 @@ public class PlantillaVariableController {
         model.addAttribute("nuevaVariable", new VariablePlantilla());
         model.addAttribute("tipos", TipoDato.values());
         model.addAttribute("variables", variableService.listarPorPlantilla(plantilla.getId()));
+        model.addAttribute("titulo", "Variables");
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
-        return "plantillas/variables"; // templates/plantillas/variables.html
+        return "Plantillas/variables"; // templates/plantillas/variables.html
     }
 
     @PostMapping
@@ -74,7 +75,7 @@ public class PlantillaVariableController {
 
         model.addAttribute("tipos", TipoDato.values());
         model.addAttribute("variables", variableService.listarPorPlantilla(plantillaId));
-        return "plantillas/variables";
+        return "Plantillas/variables";
     }
 
     @PostMapping("/{variableId}/eliminar")

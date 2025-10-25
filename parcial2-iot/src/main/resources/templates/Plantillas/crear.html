@@ -27,6 +27,8 @@
 </head>
 <body>
 
+<div th:replace="components/sidebar :: sidebar"></div>
+
 <h1>Plantillas IoT</h1>
 
 <div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
@@ -34,7 +36,7 @@
 
 <div class="card">
     <h2>Crear plantilla</h2>
-    <form th:action="@{/plantillas}" th:object="${plantilla}" method="post">
+    <form th:action="@{/templates/Plantillas}" th:object="${plantilla}" method="post">
         <div class="row">
             <div class="col">
                 <label for="nombre">Nombre *</label>
@@ -78,7 +80,7 @@
         <tr th:each="p : ${plantillas}">
             <td>
                 <!-- Nombre clicable hacia variables -->
-                <a th:href="@{|/plantillas/${p.id}/variables|}" th:text="${p.nombre}">Nombre</a>
+                <a th:href="@{|/templates/Plantillas/${p.id}/variables|}" th:text="${p.nombre}">Nombre</a>
             </td>
             <td><span class="badge" th:text="${p.protocoloPredeterminado}">mqtt</span></td>
             <td th:text="${p.descripcion}">—</td>
