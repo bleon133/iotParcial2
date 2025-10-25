@@ -1,153 +1,148 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-<head th:replace="~{components/bootstrap :: head-bootstrap}"></head>
 <head>
+    <!-- Head base (Bootstrap, meta, etc.) -->
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+
     <meta charset="UTF-8" />
     <title>Variables de Plantilla</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        body{font-family: system-ui, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px;}
-        a{color:#0d6efd; text-decoration:none;}
-        .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px;}
-        .row{display:flex; gap:12px; flex-wrap:wrap;}
-        .col{flex:1 1 240px;}
-        label{display:block; font-weight:600; margin-bottom:6px;}
-        input[type=text], input[type=number], select, textarea{
-            width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;
-        }
-        input[type=checkbox]{transform: scale(1.2);}
-        button{padding:10px 16px; border:0; border-radius:10px; cursor:pointer;}
-        .btn-primary{background:#0d6efd; color:white;}
-        .btn-danger{background:#dc3545; color:white;}
-        .errors{color:#b3261e; font-size:0.95rem; margin:8px 0;}
-        table{width:100%; border-collapse:collapse;}
-        th,td{padding:10px; border-bottom:1px solid #eee; text-align:left;}
-        .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
-        .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
-        .ok{background:#e7f7ee; color:#145d33;}
-        .err{background:#fde7e9; color:#8a1220;}
-        .muted{color:#666;}
-    </style>
+    <link rel="stylesheet" th:href="@{/css/plantillas/variables.css}">
 </head>
-<body>
+<body class="bg-light">
+<!-- Sidebar responsivo/off-canvas -->
+<div th:replace="~{components/sidebar :: sidebar}"></div>
 
-<p><a th:href="@{/plantillas}">← Volver a Plantillas</a></p>
+<!-- Contenido principal: usa .app-content para convivir con el sidebar -->
+<main class="app-content">
+    <div class="page">
+        <p><a th:href="@{/plantillas}">← Volver a Plantillas</a></p>
 
-<h1>
-    Variables — <span th:text="${plantilla.nombre}">Plantilla</span>
-    <small class="muted" th:text="${plantilla.descripcion}">Descripción</small>
-</h1>
+        <h1>
+            Variables — <span th:text="${plantilla.nombre}">Plantilla</span>
+            <small class="muted" th:text="${plantilla.descripcion}">Descripción</small>
+        </h1>
 
-<div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
-<div th:if="${error}" class="flash err" th:text="${error}"></div>
+        <div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
+        <div th:if="${error}" class="flash err" th:text="${error}"></div>
 
-<div class="card">
-    <h2>Crear variable</h2>
-    <form th:action="@{|/templates/Plantillas/${plantilla.id}/variables|}" th:object="${nuevaVariable}" method="post">
-        <div class="row">
-            <div class="col">
-                <label for="nombre">Nombre técnico *</label>
-                <input id="nombre" type="text" th:field="*{nombre}" placeholder="temperatura" required />
-                <div class="errors" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
-            </div>
+        <div class="card">
+            <h2>Crear variable</h2>
+            <!-- Unificado a /plantillas/{id}/variables -->
+            <form th:action="@{|/plantillas/${plantilla.id}/variables|}" th:object="${nuevaVariable}" method="post">
+                <div class="row">
+                    <div class="col">
+                        <label for="nombre">Nombre técnico *</label>
+                        <input id="nombre" type="text" th:field="*{nombre}" placeholder="temperatura" required />
+                        <div class="errors" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                    </div>
 
-            <div class="col">
-                <label for="etiqueta">Etiqueta (UI)</label>
-                <input id="etiqueta" type="text" th:field="*{etiqueta}" placeholder="Temperatura" />
-                <div class="errors" th:if="${#fields.hasErrors('etiqueta')}" th:errors="*{etiqueta}"></div>
-            </div>
+                    <div class="col">
+                        <label for="etiqueta">Etiqueta (UI)</label>
+                        <input id="etiqueta" type="text" th:field="*{etiqueta}" placeholder="Temperatura" />
+                        <div class="errors" th:if="${#fields.hasErrors('etiqueta')}" th:errors="*{etiqueta}"></div>
+                    </div>
 
-            <div class="col">
-                <label for="tipoDato">Tipo de dato *</label>
-                <select id="tipoDato" th:field="*{tipoDato}" required>
-                    <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}">numero</option>
-                </select>
-                <div class="errors" th:if="${#fields.hasErrors('tipoDato')}" th:errors="*{tipoDato}"></div>
-            </div>
+                    <div class="col">
+                        <label for="tipoDato">Tipo de dato *</label>
+                        <select id="tipoDato" th:field="*{tipoDato}" required>
+                            <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}">numero</option>
+                        </select>
+                        <div class="errors" th:if="${#fields.hasErrors('tipoDato')}" th:errors="*{tipoDato}"></div>
+                    </div>
 
-            <div class="col">
-                <label for="unidad">Unidad</label>
-                <input id="unidad" type="text" th:field="*{unidad}" placeholder="°C, %, ppm..." />
-                <div class="errors" th:if="${#fields.hasErrors('unidad')}" th:errors="*{unidad}"></div>
-            </div>
+                    <div class="col">
+                        <label for="unidad">Unidad</label>
+                        <input id="unidad" type="text" th:field="*{unidad}" placeholder="°C, %, ppm..." />
+                        <div class="errors" th:if="${#fields.hasErrors('unidad')}" th:errors="*{unidad}"></div>
+                    </div>
 
-            <div class="col" style="display:flex; align-items:flex-end;">
-                <label>
-                    <input type="checkbox" th:field="*{escribible}" />
-                    ¿Escribible?
-                </label>
-            </div>
+                    <div class="col" style="display:flex; align-items:flex-end;">
+                        <label>
+                            <input type="checkbox" th:field="*{escribible}" />
+                            ¿Escribible?
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="minimo">Mínimo (solo numérico)</label>
+                        <input id="minimo" type="number" step="0.01" th:field="*{minimo}" />
+                        <div class="errors" th:if="${#fields.hasErrors('minimo')}" th:errors="*{minimo}"></div>
+                    </div>
+                    <div class="col">
+                        <label for="maximo">Máximo (solo numérico)</label>
+                        <input id="maximo" type="number" step="0.01" th:field="*{maximo}" />
+                        <div class="errors" th:if="${#fields.hasErrors('maximo')}" th:errors="*{maximo}"></div>
+                    </div>
+                    <div class="col">
+                        <label for="precision">Precisión (decimales)</label>
+                        <input id="precision" type="number" min="0" step="1" th:field="*{precisionDecimales}" placeholder="0..6" />
+                        <div class="errors" th:if="${#fields.hasErrors('precisionDecimales')}" th:errors="*{precisionDecimales}"></div>
+                    </div>
+                    <div class="col">
+                        <label for="muestreo">Muestreo (ms)</label>
+                        <input id="muestreo" type="number" min="0" step="1" th:field="*{muestreoMs}" placeholder="ej. 1000" />
+                        <div class="errors" th:if="${#fields.hasErrors('muestreoMs')}" th:errors="*{muestreoMs}"></div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" type="submit">Guardar variable</button>
+            </form>
         </div>
 
-        <div class="row">
-            <div class="col">
-                <label for="minimo">Mínimo (solo numérico)</label>
-                <input id="minimo" type="number" step="0.01" th:field="*{minimo}" />
-                <div class="errors" th:if="${#fields.hasErrors('minimo')}" th:errors="*{minimo}"></div>
-            </div>
-            <div class="col">
-                <label for="maximo">Máximo (solo numérico)</label>
-                <input id="maximo" type="number" step="0.01" th:field="*{maximo}" />
-                <div class="errors" th:if="${#fields.hasErrors('maximo')}" th:errors="*{maximo}"></div>
-            </div>
-            <div class="col">
-                <label for="precision">Precisión (decimales)</label>
-                <input id="precision" type="number" min="0" step="1" th:field="*{precisionDecimales}" placeholder="0..6" />
-                <div class="errors" th:if="${#fields.hasErrors('precisionDecimales')}" th:errors="*{precisionDecimales}"></div>
-            </div>
-            <div class="col">
-                <label for="muestreo">Muestreo (ms)</label>
-                <input id="muestreo" type="number" min="0" step="1" th:field="*{muestreoMs}" placeholder="ej. 1000" />
-                <div class="errors" th:if="${#fields.hasErrors('muestreoMs')}" th:errors="*{muestreoMs}"></div>
+        <div class="card">
+            <h2>Variables definidas</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Etiqueta</th>
+                        <th>Tipo</th>
+                        <th>Unidad</th>
+                        <th>Escribible</th>
+                        <th>Mín / Máx</th>
+                        <th>Precisión</th>
+                        <th>Muestreo (ms)</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${variables}">
+                        <td th:text="${v.nombre}">temperatura</td>
+                        <td th:text="${v.etiqueta}">Temperatura</td>
+                        <td><span class="badge" th:text="${v.tipoDato}">numero</span></td>
+                        <td th:text="${v.unidad}">°C</td>
+                        <td th:text="${v.escribible ? 'Sí' : 'No'}">No</td>
+                        <td>
+                            <span th:text="${v.minimo}">-</span> /
+                            <span th:text="${v.maximo}">-</span>
+                        </td>
+                        <td th:text="${v.precisionDecimales}">0</td>
+                        <td th:text="${v.muestreoMs}">1000</td>
+                        <td style="text-align:right; white-space: nowrap;">
+                            <!-- Unificado a /plantillas/{id}/variables/{id}/eliminar -->
+                            <form th:action="@{|/plantillas/${plantilla.id}/variables/${v.id}/eliminar|}"
+                                  method="post"
+                                  th:object="${v}"
+                                  onsubmit="return confirm('¿Eliminar variable?');">
+                                <button class="btn-danger" type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(variables)}">
+                        <td colspan="9">Aún no hay variables definidas.</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div> <!-- /.page -->
+</main>
 
-        <button class="btn-primary" type="submit">Guardar variable</button>
-    </form>
-</div>
-
-<div class="card">
-    <h2>Variables definidas</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Etiqueta</th>
-            <th>Tipo</th>
-            <th>Unidad</th>
-            <th>Escribible</th>
-            <th>Mín / Máx</th>
-            <th>Precisión</th>
-            <th>Muestreo (ms)</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="v : ${variables}">
-            <td th:text="${v.nombre}">temperatura</td>
-            <td th:text="${v.etiqueta}">Temperatura</td>
-            <td><span class="badge" th:text="${v.tipoDato}">numero</span></td>
-            <td th:text="${v.unidad}">°C</td>
-            <td th:text="${v.escribible ? 'Sí' : 'No'}">No</td>
-            <td>
-                <span th:text="${v.minimo}">-</span> /
-                <span th:text="${v.maximo}">-</span>
-            </td>
-            <td th:text="${v.precisionDecimales}">0</td>
-            <td th:text="${v.muestreoMs}">1000</td>
-            <td style="text-align:right;">
-                <form th:action="@{|/templates/Plantillas/${plantilla.id}/variables/${v.id}/eliminar|}" method="post"
-                      th:object="${v}" onsubmit="return confirm('¿Eliminar variable?');">
-                    <button class="btn-danger" type="submit">Eliminar</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(variables)}">
-            <td colspan="9">Aún no hay variables definidas.</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+<!-- Scripts base (Bootstrap bundle, etc.) -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

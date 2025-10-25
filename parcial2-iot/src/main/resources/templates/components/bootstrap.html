@@ -7,10 +7,14 @@
 
     <!-- CSS: usa la versión minificada -->
     <link rel="stylesheet" th:href="@{/library/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/default.css}">
+    <link rel="stylesheet" th:href="@{/css/nav/nav.css}">
     <script th:src="@{/library/jquery/jquery-3.7.1.min.js}"></script>
 </head>
 
 <th:block th:fragment="scripts-bootstrap">
     <!-- JS: usa el bundle (trae Popper). 'defer' para no bloquear render -->
     <script defer th:src="@{/library/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script defer th:src="@{/js/nav/nav.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </th:block>

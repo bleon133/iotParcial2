@@ -38,6 +38,7 @@ public class PlantillaVariableController {
         model.addAttribute("tipos", TipoDato.values());
         model.addAttribute("variables", variableService.listarPorPlantilla(plantilla.getId()));
         model.addAttribute("titulo", "Variables");
+        model.addAttribute("nav", "plantillas");
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
         return "Plantillas/variables"; // templates/plantillas/variables.html

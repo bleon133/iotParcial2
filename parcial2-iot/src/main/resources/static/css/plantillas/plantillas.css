@@ -1,0 +1,26 @@
+.page{font-family: system-ui, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px;}
+.page .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px; background:#fff;}
+.page .row{display:flex; gap:12px; flex-wrap:wrap;}
+.page .col{flex:1 1 260px;}
+.page label{display:block; font-weight:600; margin-bottom:6px;}
+.page input[type=text], .page select, .page textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
+.page button, .page a.btn{padding:10px 16px; border:0; border-radius:10px; cursor:pointer; display:inline-block;}
+.page .btn-primary{background:#0d6efd; color:white;}
+.page .btn-secondary{background:#6c757d; color:white; text-decoration:none;}
+.page .btn-danger{background:#dc3545; color:white;}
+.page .errors{color:#b3261e; font-size:0.95rem; margin:8px 0;}
+.page table{width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;}
+.page th, .page td{padding:10px; border-bottom:1px solid #eee; text-align:left; vertical-align:middle;}
+.page th:last-child, .page td:last-child{width:1%; white-space:nowrap; text-align:right;}
+.page .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
+.page .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
+.page .ok{background:#e7f7ee; color:#145d33;}
+.page .err{background:#fde7e9; color:#8a1220;}
+
+/* En modo oscuro de SO, suaviza fondos (opcional) */
+@media (prefers-color-scheme: dark){
+    .page .card, .page table{background:#0b1220; border-color:#1b2440;}
+    .page th, .page td{border-bottom-color:#1b2440;}
+    .page input[type=text], .page select, .page textarea{background:#0f1730; color:#e7eaf3; border-color:#243056;}
+    .page .badge{background:#1a2548; color:#dbe4ff;}
+}

@@ -1,32 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!-- Head base (trae Bootstrap y el <title> con ${titulo}) -->
 <head th:replace="~{components/bootstrap :: head-bootstrap}"></head>
-<head>
-    <title>Dashboard</title>
-</head>
 
 <body class="bg-light">
+<div th:replace="~{components/sidebar :: sidebar}"></div>
 
-<div th:replace="components/sidebar :: sidebar"></div>
+<main class="app-content">
+    <div class="container py-4">
+        <!-- Título -->
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold" th:text="${titulo} ?: 'Dashboard'">Dashboard</h1>
+            <p class="lead mb-0">Sistema básico para la gestión y monitoreo de datos IoT.</p>
+        </div>
 
-<!-- Contenedor principal -->
-<div class="container mt-5">
-    <!-- Título del Proyecto -->
-    <div class="text-center">
-        <h1 class="display-4 fw-bold">BAE IoT</h1>
-        <p class="lead">Sistema básico para la gestión y monitoreo de datos IoT.</p>
+        <!-- Tarjetas de ejemplo (responsivas) -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Dispositivos</h6>
+                        <div class="fs-4 fw-semibold">—</div>
+                        <small class="text-muted">Total registrados</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">En línea</h6>
+                        <div class="fs-4 fw-semibold">—</div>
+                        <small class="text-muted">Conectados ahora</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Alertas</h6>
+                        <div class="fs-4 fw-semibold">—</div>
+                        <small class="text-muted">Últimas 24 h</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Eventos</h6>
+                        <div class="fs-4 fw-semibold">—</div>
+                        <small class="text-muted">Procesados hoy</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área para futuros componentes -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-0">Aquí irá el contenido del dashboard.</p>
+            </div>
+        </div>
     </div>
+</main>
 
-    <hr>
-
-    <!-- Espacio para futuros componentes -->
-    <div class="mt-4 text-center">
-        <p class="text-muted">Aquí irá el contenido del dashboard.</p>
-    </div>
-</div>
-<!-- ✅ Scripts base de tu proyecto -->
+<!-- Scripts base (Bootstrap bundle, etc.) -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </body>
 </html>

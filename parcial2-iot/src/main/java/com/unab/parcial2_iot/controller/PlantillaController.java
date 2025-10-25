@@ -24,6 +24,7 @@ public class PlantillaController {
         model.addAttribute("protocolos", Protocolo.values());
         model.addAttribute("plantillas", plantillaService.listar());
         model.addAttribute("titulo", "Plantillas");
+        model.addAttribute("nav", "plantillas");
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
         return "Plantillas/crear"; // templates/plantillas/crear.html
