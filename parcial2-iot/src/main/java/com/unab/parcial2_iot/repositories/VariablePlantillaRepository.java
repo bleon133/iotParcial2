@@ -4,6 +4,7 @@ import com.unab.parcial2_iot.models.VariablePlantilla;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface VariablePlantillaRepository extends JpaRepository<VariablePlantilla, UUID> {
@@ -11,4 +12,6 @@ public interface VariablePlantillaRepository extends JpaRepository<VariablePlant
     List<VariablePlantilla> findByPlantilla_IdOrderByNombreAsc(UUID plantillaId);
 
     boolean existsByPlantilla_IdAndNombreIgnoreCase(UUID plantillaId, String nombre);
+
+    Optional<VariablePlantilla> findByPlantilla_IdAndNombreIgnoreCase(UUID plantillaId, String nombre);
 }

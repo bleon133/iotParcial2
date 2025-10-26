@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dispositivos IoT - Crear</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body{font-family: system-ui, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px;}
+        a{color:#0d6efd; text-decoration:none;}
+        .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px;}
+        .row{display:flex; gap:12px; flex-wrap:wrap;}
+        .col{flex:1 1 240px;}
+        label{display:block; font-weight:600; margin-bottom:6px;}
+        input[type=text], input[type=number], select, textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
+        input[type=number]{appearance:textfield;}
+        button,a.btn{padding:10px 16px; border:0; border-radius:10px; cursor:pointer; display:inline-block;}
+        .btn-primary{background:#0d6efd; color:white;}
+        .btn-danger{background:#dc3545; color:white;}
+        table{width:100%; border-collapse:collapse;}
+        th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; vertical-align:top;}
+        th:last-child, td:last-child{width:1%; white-space:nowrap; text-align:right;}
+        .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
+        .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
+        .ok{background:#e7f7ee; color:#145d33;}
+        .err{background:#fde7e9; color:#8a1220;}
+        .muted{color:#666;}
+        pre{white-space:pre-wrap; margin:0;}
+    </style>
+</head>
+<body>
+
+<p>
+    <a th:href="@{/plantillas}">← Ir a Plantillas</a>
+</p>
+
+<h1>Dispositivos IoT</h1>
+
+<div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
+<div th:if="${error}" class="flash err" th:text="${error}"></div>
+
+<div class="card">
+    <h2>Crear dispositivo</h2>
+
+    <form th:action="@{/dispositivos}" th:object="${form}" method="post">
+        <div class="row">
+            <div class="col">
+                <label for="plantillaId">Plantilla *</label>
+                <select id="plantillaId" th:field="*{plantillaId}" required>
+                    <option value="" disabled selected>Selecciona...</option>
+                    <option th:each="pl : ${plantillas}" th:value="${pl.id}" th:text="${pl.nombre}">Plantilla</option>
+                </select>
+                <div class="err" th:if="${#fields.hasErrors('plantillaId')}" th:errors="*{plantillaId}"></div>
+            </div>
+
+            <div class="col">
+                <label for="idExterno">id_externo *</label>
+                <input id="idExterno" type="text" th:field="*{idExterno}" placeholder="esp32-ambiental-001" required />
+                <div class="err" th:if="${#fields.hasErrors('idExterno')}" th:errors="*{idExterno}"></div>
+            </div>
+
+            <div class="col">
+                <label for="nombre">Nombre *</label>
+                <input id="nombre" type="text" th:field="*{nombre}" placeholder="Sensor Sala" required />
+                <div class="err" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="tipo">Tipo *</label>
+                <select id="tipo" th:field="*{tipo}" required>
+                    <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}">real</option>
+                </select>
+                <div class="err" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></div>
+            </div>
+
+            <div class="col">
+                <label for="protocolo">Protocolo</label>
+                <select id="protocolo" th:field="*{protocolo}">
+                    <option value="">(usar el de la plantilla)</option>
+                    <option th:each="p : ${protocolos}" th:value="${p}" th:text="${p}">mqtt</option>
+                </select>
+                <div class="err" th:if="${#fields.hasErrors('protocolo')}" th:errors="*{protocolo}"></div>
+            </div>
+
+            <div class="col">
+                <label for="estado">Estado</label>
+                <input id="estado" type="text" th:field="*{estado}" placeholder="habilitado" />
+                <div class="err" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="topicoMqttTelemetria">Tópico MQTT (telemetría)</label>
+                <input id="topicoMqttTelemetria" type="text" th:field="*{topicoMqttTelemetria}" placeholder="iot/telemetria/{id}" />
+            </div>
+            <div class="col">
+                <label for="topicoMqttComando">Tópico MQTT (comandos)</label>
+                <input id="topicoMqttComando" type="text" th:field="*{topicoMqttComando}" placeholder="iot/comandos/{id}" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="latitud">Latitud</label>
+                <input id="latitud" type="number" step="any" min="-90" max="90" th:field="*{latitud}" placeholder="7.1193" />
+            </div>
+            <div class="col">
+                <label for="longitud">Longitud</label>
+                <input id="longitud" type="number" step="any" min="-180" max="180" th:field="*{longitud}" placeholder="-73.1227" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col" style="flex:1 1 100%;">
+                <label for="etiquetasJson">Etiquetas (JSON)</label>
+                <textarea id="etiquetasJson" rows="3" th:field="*{etiquetasJson}" placeholder='{"ubicacion":"sala","modelo":"ESP32"}'></textarea>
+                <div class="err" th:if="${#fields.hasErrors('etiquetasJson')}" th:errors="*{etiquetasJson}"></div>
+            </div>
+        </div>
+
+        <button class="btn-primary" type="submit">Guardar dispositivo</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Dispositivos registrados</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>id_externo</th>
+            <th>Nombre</th>
+            <th>Plantilla</th>
+            <th>Tipo</th>
+            <th>Protocolo</th>
+            <th>Tópicos</th>
+            <th>Ubicación</th>
+            <th>Etiquetas</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${dispositivos}">
+            <td th:text="${d.idExterno}">esp32-ambiental-001</td>
+            <td th:text="${d.nombre}">Sensor Sala</td>
+            <td th:text="${d.plantilla != null ? d.plantilla.nombre : '-'}">PlantillaX</td>
+            <td><span class="badge" th:text="${d.tipo}">real</span></td>
+            <td><span class="badge" th:text="${d.protocolo}">mqtt</span></td>
+            <td>
+                <div><small class="muted">tele:</small> <span th:text="${d.topicoMqttTelemetria}">-</span></div>
+                <div><small class="muted">cmd:</small> <span th:text="${d.topicoMqttComando}">-</span></div>
+            </td>
+            <td>
+                <div><small>lat:</small> <span th:text="${d.latitud}">-</span></div>
+                <div><small>lon:</small> <span th:text="${d.longitud}">-</span></div>
+            </td>
+            <td>
+                <pre th:text="${d.etiquetas}">—</pre>
+            </td>
+            <td>
+                <form th:action="@{|/dispositivos/${d.id}/eliminar|}" method="post" onsubmit="return confirm('¿Eliminar dispositivo?');">
+                    <button class="btn-danger" type="submit">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(dispositivos)}">
+            <td colspan="9">Aún no hay dispositivos.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

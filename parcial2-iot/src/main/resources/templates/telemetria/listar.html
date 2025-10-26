@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Telemetría</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body{font-family: system-ui, sans-serif; max-width:1100px; margin:24px auto; padding:0 16px;}
+        a{color:#0d6efd; text-decoration:none;}
+        .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px;}
+        .row{display:flex; gap:12px; flex-wrap:wrap;}
+        .col{flex:1 1 260px;}
+        label{display:block; font-weight:600; margin-bottom:6px;}
+        select,input{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
+        button{padding:10px 16px; border:0; border-radius:10px; cursor:pointer;}
+        .btn-primary{background:#0d6efd; color:#fff;}
+        table{width:100%; border-collapse:collapse;}
+        th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; vertical-align:top;}
+        pre{white-space:pre-wrap; margin:0;}
+        .muted{color:#666;}
+    </style>
+</head>
+<body>
+
+<p>
+    <a th:href="@{/dispositivos}">← Dispositivos</a>
+</p>
+
+<h1>Telemetría</h1>
+
+<div class="card">
+    <form th:action="@{/telemetria}" method="get">
+        <div class="row">
+            <div class="col">
+                <label for="disp">Dispositivo</label>
+                <select id="disp" name="dispositivoId" onchange="this.form.submit()">
+                    <option value="">—</option> <!-- antes: th:value="" -->
+                    <option th:each="d : ${dispositivos}" th:value="${d.id}"
+                            th:selected="${d.id == dispositivoId}"
+                            th:text="${d.nombre + ' (' + d.idExterno + ')'}">
+                        Device
+                    </option>
+                </select>
+            </div>
+
+            <div class="col">
+                <label for="var">Variable</label>
+                <select id="var" name="variableId">
+                    <option value="">—</option> <!-- antes: th:value="" -->
+                    <option th:each="v : ${variables}" th:value="${v.id}"
+                            th:selected="${v.id == variableId}"
+                            th:text="${v.nombre}">
+                        Var
+                    </option>
+                </select>
+            </div>
+
+            <div class="col">
+                <label for="limit">Cantidad</label>
+                <input id="limit" name="limit" type="number" min="1" max="500" th:value="${limit}" />
+            </div>
+
+            <div class="col" style="display:flex; align-items:flex-end;">
+                <button class="btn-primary" type="submit">Ver</button>
+            </div>
+        </div>
+        <p class="muted">Primero elige un dispositivo; el combo de variables se llena con las variables de su plantilla.</p>
+    </form>
+</div>
+
+<div class="card" th:if="${#lists.size(filas) > 0}">
+    <h2>Últimas lecturas</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Valor</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="f : ${filas}">
+            <td th:text="${#temporals.format(f.ts, 'yyyy-MM-dd HH:mm:ss')}">—</td>
+            <td>
+                <span th:if="${f.valorNumero != null}"   th:text="${f.valorNumero}"></span>
+                <span th:if="${f.valorBooleano != null}" th:text="${f.valorBooleano}"></span>
+                <span th:if="${f.valorTexto != null}"    th:text="${f.valorTexto}"></span>
+                <pre  th:if="${f.valorJson != null}"     th:text="${f.valorJson}"></pre> <!-- ahora es String -->
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card" th:if="${#lists.size(filas) == 0}">
+    <p class="muted">No hay lecturas para ese filtro.</p>
+</div>
+
+</body>
+</html>
