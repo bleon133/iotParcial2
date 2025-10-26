@@ -120,6 +120,11 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>  <!-- Versión estable más reciente del cliente Paho v3 -->
+        </dependency>
     </dependencies>
 
 	<build>

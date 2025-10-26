@@ -1,0 +1,9 @@
+app:
+  mqtt:
+    url: tcp://localhost:1883
+    username: ""
+    password: ""
+    inboundTopics:
+      - devices/+/telemetry
+      - devices/+/telemetry/+
+    qos: 1
