@@ -1,87 +1,141 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!-- Head base del proyecto -->
     <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title th:text="${titulo} ?: 'Telemetría'">Telemetría</title>
+
+    <!-- Estilos específicos -->
     <link rel="stylesheet" th:href="@{/css/telemetria/telemetria.css}">
 </head>
 <body>
+<!-- Sidebar corporativo -->
 <div th:replace="~{components/sidebar :: sidebar}"></div>
 
+<!-- Contenido principal -->
 <main class="app-content">
-    <p>
-        <a th:href="@{/dispositivos}">← Dispositivos</a>
-    </p>
+    <div class="container-fluid py-4">
 
-    <h1>Telemetría</h1>
+        <!-- Header -->
+        <header class="page-header">
+            <h1 class="page-title" th:text="${titulo} ?: 'Telemetría'">Telemetría</h1>
+            <p class="page-subtitle">
+                Consulta lecturas recientes por dispositivo y variable.
+            </p>
+        </header>
 
-    <div class="card">
-        <form th:action="@{/telemetria}" method="get">
-            <div class="row">
-                <div class="col">
-                    <label for="disp">Dispositivo</label>
-                    <select id="disp" name="dispositivoId" onchange="this.form.submit()">
-                        <option value="">—</option> <!-- antes: th:value="" -->
-                        <option th:each="d : ${dispositivos}" th:value="${d.id}"
-                                th:selected="${d.id == dispositivoId}"
-                                th:text="${d.nombre + ' (' + d.idExterno + ')'}">
-                            Device
-                        </option>
-                    </select>
-                </div>
+        <!-- Filtros -->
+        <section class="card shadow-soft mb-4">
+            <div class="card-body">
+                <form method="get" novalidate th:action="@{/telemetria}">
+                    <div class="row g-3 align-items-end">
 
-                <div class="col">
-                    <label for="var">Variable</label>
-                    <select id="var" name="variableId">
-                        <option value="">—</option> <!-- antes: th:value="" -->
-                        <option th:each="v : ${variables}" th:value="${v.id}"
-                                th:selected="${v.id == variableId}"
-                                th:text="${v.nombre}">
-                            Var
-                        </option>
-                    </select>
-                </div>
+                        <!-- Dispositivo -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold" for="disp">Dispositivo</label>
+                            <select class="form-select" id="disp" name="dispositivoId" onchange="this.form.submit()">
+                                <option value="">—</option>
+                                <option th:each="d : ${dispositivos}"
+                                        th:selected="${d.id == dispositivoId}"
+                                        th:text="${d.nombre + ' (' + d.idExterno + ')'}"
+                                        th:value="${d.id}">
+                                    Device
+                                </option>
+                            </select>
+                        </div>
 
-                <div class="col">
-                    <label for="limit">Cantidad</label>
-                    <input id="limit" name="limit" type="number" min="1" max="500" th:value="${limit}" />
-                </div>
+                        <!-- Variable -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold" for="var">Variable</label>
+                            <select class="form-select" id="var" name="variableId">
+                                <option value="">—</option>
+                                <option th:each="v : ${variables}"
+                                        th:selected="${v.id == variableId}"
+                                        th:text="${v.nombre}"
+                                        th:value="${v.id}">
+                                    Var
+                                </option>
+                            </select>
+                        </div>
 
-                <div class="col" style="display:flex; align-items:flex-end;">
-                    <button class="btn-primary" type="submit">Ver</button>
-                </div>
+                        <!-- Cantidad -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold" for="limit">Cantidad</label>
+                            <input class="form-control" id="limit" max="500" min="1" name="limit" th:value="${limit}"
+                                   type="number"/>
+                            <div class="form-text">Máx. 500 registros</div>
+                        </div>
+
+                        <!-- Botón -->
+                        <div class="col-12 col-md-1 d-grid">
+                            <button class="btn btn-primary" type="submit">Ver</button>
+                        </div>
+
+                    </div>
+                    <p class="text-muted mt-2 mb-0">
+                        Primero elige un dispositivo; la lista de variables se llena con las de su plantilla.
+                    </p>
+                </form>
             </div>
-            <p class="muted">Primero elige un dispositivo; el combo de variables se llena con las variables de su plantilla.</p>
-        </form>
-    </div>
+        </section>
 
-    <div class="card" th:if="${#lists.size(filas) > 0}">
-        <h2>Últimas lecturas</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Timestamp</th>
-                <th>Valor</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="f : ${filas}">
-                <td th:text="${#temporals.format(f.ts, 'yyyy-MM-dd HH:mm:ss')}">—</td>
-                <td>
-                    <span th:if="${f.valorNumero != null}"   th:text="${f.valorNumero}"></span>
-                    <span th:if="${f.valorBooleano != null}" th:text="${f.valorBooleano}"></span>
-                    <span th:if="${f.valorTexto != null}"    th:text="${f.valorTexto}"></span>
-                    <pre  th:if="${f.valorJson != null}"     th:text="${f.valorJson}"></pre> <!-- ahora es String -->
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+        <!-- Resultados -->
+        <section aria-live="polite" class="card shadow-soft" th:if="${#lists.size(filas) > 0}">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                    <h2 class="section-title mb-0">Últimas lecturas</h2>
+                    <div class="small text-muted">
+    <span th:if="${dispositivoNombre != null}">
+      Disp: <strong th:text="${dispositivoNombre}">—</strong>
+    </span>
+                        <span class="mx-2" th:if="${dispositivoNombre != null && variableNombre != null}">•</span>
+                        <span th:if="${variableNombre != null}">
+      Var: <strong th:text="${variableNombre}">—</strong>
+    </span>
+                        <span class="mx-2">•</span>
+                        <span>Registros: <strong th:text="${#lists.size(filas)}">0</strong></span>
+                    </div>
+                </div>
 
-    <div class="card" th:if="${#lists.size(filas) == 0}">
-        <p class="muted">No hay lecturas para ese filtro.</p>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Valor</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="f : ${filas}">
+                            <td class="text-nowrap" th:text="${#temporals.format(f.ts, 'yyyy-MM-dd HH:mm:ss')}">—</td>
+                            <td>
+                                <span th:if="${f.valorNumero != null}" th:text="${f.valorNumero}"></span>
+                                <span th:if="${f.valorBooleano != null}" th:text="${f.valorBooleano}"></span>
+                                <span th:if="${f.valorTexto != null}" th:text="${f.valorTexto}"></span>
+                                <pre class="json-pre" th:if="${f.valorJson != null}" th:text="${f.valorJson}"></pre>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Vacío -->
+        <section class="card shadow-soft" th:if="${#lists.size(filas) == 0}">
+            <div class="card-body">
+                <p class="text-muted mb-0">No hay lecturas para ese filtro.</p>
+            </div>
+        </section>
+
     </div>
 </main>
+
+<!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
 </body>
 </html>

@@ -1,91 +1,178 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <!-- Head base (Bootstrap, meta, etc.) -->
+    <!-- Head base del proyecto (Bootstrap, meta, etc.) -->
     <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="stylesheet" th:href="@{/css/Plantillas/plantillas.css}">
+    <!-- Mantener rutas en minúsculas -->
+    <link rel="stylesheet" th:href="@{/css/plantillas/plantillas.css}">
+    <title th:text="${titulo} ?: 'Plantillas IoT'">Plantillas IoT</title>
 </head>
 <body>
-
-<!-- Sidebar responsivo/off-canvas -->
+<!-- Sidebar corporativo -->
 <div th:replace="~{components/sidebar :: sidebar}"></div>
 
-<!-- Contenido de la página: usa la clase .app-content para que el sidebar ajuste el margen -->
+<!-- Contenido principal (márgenes los maneja nav.css via .app-content) -->
 <main class="app-content">
-    <div class="page">
-        <h1>Plantillas IoT</h1>
+    <div class="container-fluid py-4">
 
-        <div th:if="${ok}" class="flash ok" th:text="${ok}"></div>
-        <div th:if="${error}" class="flash err" th:text="${error}"></div>
+        <!-- Encabezado de página -->
+        <header class="page-header">
+            <h1 class="page-title" th:text="${titulo} ?: 'Plantillas IoT'">Plantillas IoT</h1>
+            <p class="page-subtitle">
+                Define modelos de dispositivos, su protocolo por defecto y documenta su propósito.
+            </p>
+        </header>
 
-        <div class="card">
-            <h2>Crear plantilla</h2>
-            <!-- Unificado a /plantillas para coincidir con el enlace del sidebar -->
-            <form th:action="@{/plantillas}" th:object="${plantilla}" method="post">
-                <div class="row">
-                    <div class="col">
-                        <label for="nombre">Nombre *</label>
-                        <input id="nombre" type="text" th:field="*{nombre}" placeholder="Sensor Ambiental v1" required />
-                        <div class="errors" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
-                    </div>
-                    <div class="col">
-                        <label for="protocolo">Protocolo predeterminado *</label>
-                        <select id="protocolo" th:field="*{protocoloPredeterminado}" required>
-                            <option th:each="p : ${protocolos}" th:value="${p}" th:text="${p}">mqtt</option>
-                        </select>
-                        <div class="errors" th:if="${#fields.hasErrors('protocoloPredeterminado')}" th:errors="*{protocoloPredeterminado}"></div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col" style="flex:1 1 100%;">
-                        <label for="descripcion">Descripción</label>
-                        <textarea id="descripcion" rows="3" th:field="*{descripcion}" placeholder="Texto descriptivo del modelo..."></textarea>
-                        <div class="errors" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
-                    </div>
-                </div>
-
-                <button class="btn-primary" type="submit">Guardar</button>
-            </form>
+        <!-- Alertas (flash) -->
+        <div th:if="${ok}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${ok}">Operación exitosa</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Ha ocurrido un error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
 
-        <div class="card">
-            <h2>Plantillas existentes</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Protocolo</th>
-                    <th>Descripción</th>
-                    <th>Creado en</th>
-                    <th>Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="p : ${plantillas}">
-                    <td>
-                        <!-- Nombre clicable hacia variables (ruta unificada) -->
-                        <a th:href="@{|/plantillas/${p.id}/variables|}" th:text="${p.nombre}">Nombre</a>
-                    </td>
-                    <td><span class="badge" th:text="${p.protocoloPredeterminado}">mqtt</span></td>
-                    <td th:text="${p.descripcion}">—</td>
-                    <td th:text="${p.creadoEn}">—</td>
-                    <td>
-                        <a class="btn btn-secondary" th:href="@{|/plantillas/${p.id}/variables|}">Ver variables</a>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(plantillas)}">
-                    <td colspan="5">Aún no hay plantillas.</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Crear plantilla -->
+        <section class="card shadow-soft mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="section-title mb-0">Crear plantilla</h2>
+                </div>
+
+                <form th:action="@{/plantillas}" th:object="${plantilla}" method="post" novalidate>
+                    <div class="row g-3">
+
+                        <!-- Nombre -->
+                        <div class="col-12 col-md-6">
+                            <label for="nombre" class="form-label fw-semibold">Nombre *</label>
+                            <input id="nombre" type="text" class="form-control"
+                                   th:classappend="${#fields.hasErrors('nombre')} ? ' is-invalid'"
+                                   th:field="*{nombre}" placeholder="Sensor Ambiental v1" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                                 th:errors="*{nombre}">Error en el nombre</div>
+                        </div>
+
+                        <!-- Protocolo predeterminado -->
+                        <div class="col-12 col-md-6">
+                            <label for="protocolo" class="form-label fw-semibold">Protocolo predeterminado *</label>
+                            <select id="protocolo" class="form-select"
+                                    th:classappend="${#fields.hasErrors('protocoloPredeterminado')} ? ' is-invalid'"
+                                    th:field="*{protocoloPredeterminado}" required>
+                                <option th:each="p : ${protocolos}" th:value="${p}" th:text="${p}">mqtt</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('protocoloPredeterminado')}"
+                                 th:errors="*{protocoloPredeterminado}">Selecciona un protocolo</div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-12">
+                            <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+                            <textarea id="descripcion" rows="3" class="form-control"
+                                      th:classappend="${#fields.hasErrors('descripcion')} ? ' is-invalid'"
+                                      th:field="*{descripcion}"
+                                      placeholder="Breve descripción del modelo (puerto, variables esperadas, etc.)."></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}"
+                                 th:errors="*{descripcion}">Revisa la descripción</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-save me-1"></i> Guardar
+                        </button>
+                        <button class="btn btn-outline-secondary" type="reset">
+                            <i class="bi bi-eraser me-1"></i> Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Listado de plantillas -->
+        <section class="card shadow-soft">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="section-title mb-0">Plantillas existentes</h2>
+                    <!-- Slot opcional para filtros/búsqueda futura -->
+                    <!-- <div class="w-100 w-md-auto">
+                      <input class="form-control" placeholder="Buscar plantilla…">
+                    </div> -->
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Protocolo</th>
+                            <th style="min-width: 280px;">Descripción</th>
+                            <th>Creado en</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <tr th:each="p : ${plantillas}">
+                            <!-- Nombre enlazado -->
+                            <td class="fw-semibold">
+                                <a th:href="@{|/plantillas/${p.id}/variables|}" th:text="${p.nombre}">Nombre</a>
+                            </td>
+
+                            <!-- Protocolo -->
+                            <td>
+                                <span class="badge text-bg-secondary" th:text="${p.protocoloPredeterminado}">mqtt</span>
+                            </td>
+
+                            <!-- Descripción (truncable en pantallas pequeñas) -->
+                            <td class="text-truncate" style="max-width: 420px;" th:text="${p.descripcion}">—</td>
+
+                            <!-- Fecha (si es LocalDateTime puedes formatear con #dates) -->
+                            <td th:text="${p.creadoEn}">—</td>
+                            <!-- Ejemplo con formato:
+                            <td th:text="${#dates.format(p.creadoEn, 'yyyy-MM-dd HH:mm')}">—</td>
+                            -->
+
+                            <!-- Acciones -->
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Acciones">
+                                    <a class="btn btn-outline-primary"
+                                       th:href="@{|/plantillas/${p.id}/variables|}">
+                                        <i class="bi bi-list-check me-1"></i> Variables
+                                    </a>
+                                    <!-- Si luego agregas editar/eliminar:
+                                    <a class="btn btn-outline-secondary" th:href="@{|/plantillas/${p.id}/editar|}">
+                                      <i class="bi bi-pencil-square me-1"></i> Editar
+                                    </a>
+                                    <form th:action="@{|/plantillas/${p.id}/eliminar|}" method="post"
+                                          onsubmit="return confirm('¿Eliminar plantilla?');" class="d-inline">
+                                      <button class="btn btn-outline-danger" type="submit">
+                                        <i class="bi bi-trash3 me-1"></i> Eliminar
+                                      </button>
+                                    </form>
+                                    -->
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Estado vacío -->
+                        <tr th:if="${#lists.isEmpty(plantillas)}">
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay plantillas aún. Crea la primera con el formulario superior.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
     </div>
 </main>
 
-<!-- Scripts de Bootstrap (bundle) -->
+<!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
 </body>
 </html>

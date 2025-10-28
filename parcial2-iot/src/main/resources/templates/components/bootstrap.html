@@ -1,19 +1,19 @@
 <head th:fragment="head-bootstrap">
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- opcional hoy en día -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Fallback de título por si no llega 'titulo' -->
     <title th:text="${titulo} ?: 'BAE IoT'">Aplicación IoT</title>
 
-    <!-- CSS: usa la versión minificada -->
+    <!-- Bootstrap + estilos base -->
     <link rel="stylesheet" th:href="@{/library/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/default.css}">
+    <!-- Sidebar / layout -->
     <link rel="stylesheet" th:href="@{/css/nav/nav.css}">
+    <!-- Páginas (se cargan en cada vista, ver abajo) -->
     <script th:src="@{/library/jquery/jquery-3.7.1.min.js}"></script>
 </head>
 
 <th:block th:fragment="scripts-bootstrap">
-    <!-- JS: usa el bundle (trae Popper). 'defer' para no bloquear render -->
     <script defer th:src="@{/library/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script defer th:src="@{/js/nav/nav.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

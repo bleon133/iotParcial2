@@ -1,23 +1,80 @@
-.page{font-family: system-ui, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px;}
-.page a{color:#0d6efd; text-decoration:none;}
-.page .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px; background:#fff;}
-.page .row{display:flex; gap:12px; flex-wrap:wrap;}
-.page .col{flex:1 1 240px;}
-.page label{display:block; font-weight:600; margin-bottom:6px;}
-.page input[type=text],
-.page input[type=number],
-.page select,
-.page textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
-.page input[type=checkbox]{transform: scale(1.2);}
-.page button{padding:10px 16px; border:0; border-radius:10px; cursor:pointer;}
-.page .btn-primary{background:#0d6efd; color:white;}
-.page .btn-danger{background:#dc3545; color:white;}
-.page .errors{color:#b3261e; font-size:0.95rem; margin:8px 0;}
-.page .table-wrap{width:100%; overflow-x:auto;}
-.page table{width:100%; border-collapse:collapse; min-width:760px;}
-.page th,.page td{padding:10px; border-bottom:1px solid #eee; text-align:left;}
-.page .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
-.page .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
-.page .ok{background:#e7f7ee; color:#145d33;}
-.page .err{background:#fde7e9; color:#8a1220;}
-.page .muted{color:#666;}
+/* ========== Variables de Plantilla ========== */
+
+/* Encabezado de página (alineado con dashboard/plantillas) */
+.page-header {
+    margin-bottom: 1.25rem;
+}
+.page-title {
+    color: #1d3557;
+    font-weight: 700;
+    line-height: 1.1;
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    margin: 0;
+}
+.page-subtitle {
+    color: #6c757d;
+    margin: .25rem 0 0 0;
+}
+
+/* Link volver */
+.back-link {
+    color: #0d6efd;
+    text-decoration: none;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Subtítulos de secciones */
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+/* Tarjetas */
+.card {
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+.shadow-soft {
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+/* Formularios */
+.form-label { margin-bottom: .35rem; }
+.form-control, .form-select, textarea.form-control {
+    border-radius: 10px;
+}
+.is-invalid { border-color: #dc3545; }
+
+/* Tablas */
+.table thead th {
+    font-weight: 600;
+    color: #475569;
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+
+/* Badges */
+.badge { border-radius: 999px; }
+
+/* Alerts */
+.alert { border-radius: 10px; }
+
+/* Responsivo */
+@media (max-width: 991.98px) {
+    .page-header { margin-bottom: 1rem; }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    .card { transition: none !important; }
+}

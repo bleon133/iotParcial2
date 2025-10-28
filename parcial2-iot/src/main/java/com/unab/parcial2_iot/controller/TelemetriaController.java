@@ -31,15 +31,31 @@ public class TelemetriaController {
         List<VariablePlantilla> variables = Collections.emptyList();
         List<TelemetriaRepository.TelemetriaRow> filas = Collections.emptyList();
 
+        String dispositivoNombre = null;
+        String variableNombre = null;
+
         if (dispositivoId != null) {
-            // cargar variables de la plantilla del dispositivo
-            var disp = dispositivoRepo.findById(dispositivoId).orElse(null);
-            if (disp != null) {
-                variables = varRepo.findByPlantilla_IdOrderByNombreAsc(disp.getPlantilla().getId());
+            // buscar dispositivo seleccionado en la lista ya cargada
+            Dispositivo dispSel = dispositivos.stream()
+                    .filter(d -> d.getId().equals(dispositivoId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (dispSel != null) {
+                dispositivoNombre = dispSel.getNombre();
+                // cargar variables de su plantilla
+                variables = varRepo.findByPlantilla_IdOrderByNombreAsc(dispSel.getPlantilla().getId());
             }
         }
 
         if (dispositivoId != null && variableId != null) {
+            // nombre de variable (si está en la lista cargada)
+            variableNombre = variables.stream()
+                    .filter(v -> v.getId().equals(variableId))
+                    .map(VariablePlantilla::getNombre)
+                    .findFirst()
+                    .orElse(null);
+
             filas = teleRepo.ultimas(dispositivoId, variableId, Math.min(Math.max(limit, 1), 500));
         }
 
@@ -50,6 +66,12 @@ public class TelemetriaController {
         model.addAttribute("variableId", variableId);
         model.addAttribute("limit", limit);
 
-        return "telemetria/listar"; // templates/telemetria/listar.html
+        // ➕ para el header y el sidebar
+        model.addAttribute("dispositivoNombre", dispositivoNombre);
+        model.addAttribute("variableNombre", variableNombre);
+        model.addAttribute("titulo", "Telemetría");
+        model.addAttribute("nav", "telemetria");
+
+        return "telemetria/listar";
     }
 }

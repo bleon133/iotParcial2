@@ -1,14 +1,15 @@
+/* ===== Variables y capas ===== */
 :root{
-    --sb-w: 260px;
-    --sb-w-collapsed: 72px;
-    --sb-bg: #1f2937;      /* gris 800 */
-    --sb-hover: #374151;   /* gris 700 */
-    --sb-border: #111827;  /* gris 900 */
-    --sb-text: #f9fafb;    /* casi blanco */
-    --sb-muted: #cbd5e1;   /* gris 300 */
+    --sb-w: 264px;
+    --sb-w-collapsed: 76px;
+    --sb-bg: #1f2937;         /* gris 800 */
+    --sb-hover: #374151;      /* gris 700 */
+    --sb-border: #111827;     /* gris 900 */
+    --sb-text: #f9fafb;       /* casi blanco */
+    --radius: 12px;
+    --transition: .2s ease;
+
     --z-sidebar: 1040;
     --z-backdrop: 1030;
     --z-fab: 1055;
-    --radius: 12px;
-    --transition: .2s ease;
 }

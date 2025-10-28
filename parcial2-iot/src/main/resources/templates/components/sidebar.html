@@ -1,17 +1,10 @@
 <div th:fragment="sidebar">
-    <!-- Botón flotante para móvil -->
-    <button
-            type="button"
-            class="sidebar-fab"
-            aria-label="Abrir menú"
-            aria-controls="appSidebar"
-            aria-expanded="false"
-            onclick="toggleSidebar()"
-    >
-        ☰
-    </button>
+    <!-- FAB móvil -->
+    <button type="button" class="sidebar-fab"
+            aria-label="Abrir menú" aria-controls="appSidebar" aria-expanded="false"
+            onclick="toggleSidebar()">☰</button>
 
-    <!-- Overlay para móvil -->
+    <!-- Overlay móvil -->
     <div class="sidebar-backdrop" onclick="closeSidebar()" tabindex="-1"></div>
 
     <!-- Sidebar -->
@@ -19,27 +12,22 @@
         <header class="sidebar-header">
       <span class="brand">
         <strong class="brand-full">IoT&nbsp;Admin</strong>
-        <strong class="brand-compact" aria-hidden="true">IA</strong> <!-- opcional -->
+        <strong class="brand-compact" aria-hidden="true">IA</strong>
       </span>
 
             <!-- Toggle desktop/móvil -->
-            <button
-                    type="button"
-                    class="sidebar-toggle"
-                    aria-label="Colapsar/expandir menú"
-                    aria-controls="appSidebar"
-                    aria-pressed="false"
-                    onclick="toggleSidebar()"
-            >
-                ☰
-            </button>
+            <button type="button" class="sidebar-toggle"
+                    aria-label="Colapsar/expandir menú" aria-controls="appSidebar" aria-pressed="false"
+                    onclick="toggleSidebar()">☰</button>
         </header>
 
-        <!-- Usa la variable 'nav' de tus controladores -->
+        <!-- Usa la variable 'nav' que mandas desde el controlador -->
         <nav class="sidebar-nav" th:with="currentNav=${nav} ?: ''">
             <ul>
                 <li>
-                    <a th:href="@{/dashboard}" th:classappend="${currentNav == 'dashboard'} ? 'active'">
+                    <a th:href="@{/dashboard}"
+                       th:classappend="${currentNav == 'dashboard'} ? 'active'"
+                       th:attrappend="aria-current=${currentNav == 'dashboard'} ? 'page'">
                         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
                         </svg>
@@ -48,7 +36,9 @@
                 </li>
 
                 <li>
-                    <a th:href="@{/plantillas}" th:classappend="${currentNav == 'plantillas'} ? 'active'">
+                    <a th:href="@{/plantillas}"
+                       th:classappend="${currentNav == 'plantillas'} ? 'active'"
+                       th:attrappend="aria-current=${currentNav == 'plantillas'} ? 'page'">
                         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v14l4-2 4 2 4-2 4 2V8zM6 4h7v4H6z"/>
                         </svg>
@@ -57,25 +47,27 @@
                 </li>
 
                 <li>
-                    <a th:href="@{/dispositivos}" th:classappend="${currentNav == 'dispositivos'} ? 'active'">
+                    <a th:href="@{/dispositivos}"
+                       th:classappend="${currentNav == 'dispositivos'} ? 'active'"
+                       th:attrappend="aria-current=${currentNav == 'dispositivos'} ? 'page'">
                         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor"
                                   d="M12 20a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2zm6-6v-3a6 6 0 0 0-12 0v3l-2 2v1h16v-1l-2-2zM12 4a4 4 0 0 1 4 4v3H8V8a4 4 0 0 1 4-4z"/>
                         </svg>
-                        <span class="link-label">dispositivos</span>
+                        <span class="link-label">Dispositivos</span>
                     </a>
                 </li>
 
                 <li>
-                    <a th:href="@{/telemetria}" th:classappend="${currentNav == 'telemetria'} ? 'active'">
+                    <a th:href="@{/telemetria}"
+                       th:classappend="${currentNav == 'telemetria'} ? 'active'"
+                       th:attrappend="aria-current=${currentNav == 'telemetria'} ? 'page'">
                         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                            <path fill="currentColor"
-                                  d="M3 3v18h18v-2H5V3H3zm16 4-4 7-3-3-4 6h14l-3-10z"/>
+                            <path fill="currentColor" d="M3 3v18h18v-2H5V3H3zm16 4-4 7-3-3-4 6h14l-3-10z"/>
                         </svg>
-                        <span class="link-label">telemetria</span>
+                        <span class="link-label">Telemetría</span>
                     </a>
                 </li>
-                <!-- Más entradas: usa th:classappend="${currentNav == 'xxx'} ? 'active'" -->
             </ul>
         </nav>
     </aside>

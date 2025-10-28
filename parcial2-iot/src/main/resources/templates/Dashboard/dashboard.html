@@ -1,78 +1,83 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{components/bootstrap :: head-bootstrap}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <title th:text="${titulo} ?: 'Dashboard'">Dashboard</title>
-    <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
-</head>
+<head>
+    <!-- Head base (Bootstrap, jQuery, etc.) -->
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
 
-<body>
-<!-- Sidebar -->
+    <!-- Estilos específicos de esta página -->
+    <link rel="stylesheet" th:href="@{/css/nav/nav.css}">
+    <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
+    <!-- Iconos de Bootstrap (necesarios para .bi) -->
+    <link rel="stylesheet" th:href="@{/library/bootstrap-icons/bootstrap-icons.min.css}">
+    <title th:text="${titulo} ?: 'Dashboard'">Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body class="bg-light">
 <div th:replace="~{components/sidebar :: sidebar}"></div>
 
-<!-- Contenido principal -->
 <main class="app-content">
-    <div class="container py-5">
-        <!-- Encabezado -->
-        <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold" th:text="${titulo} ?: 'Dashboard'">Dashboard</h1>
-            <p class="lead mb-0 text-secondary">Panel general para la supervisión y análisis de dispositivos IoT.</p>
-        </div>
+    <div class="container-fluid py-4">
+        <header class="mb-4">
+            <h1 class="fw-bold lh-1 mb-1"
+                style="font-size:clamp(1.5rem, 3.5vw, 2.25rem);"
+                th:text="${titulo} ?: 'Dashboard'">Dashboard</h1>
+            <p class="lead text-secondary mb-0">Panel general para la supervisión y análisis de dispositivos IoT.</p>
+        </header>
 
-        <!-- Tarjetas principales -->
-        <div class="row g-4 mb-5">
-            <div class="col-12 col-sm-6 col-xl-3">
+        <!-- Métricas: grid auto-adaptable -->
+        <section class="row g-4 row-cols-1 row-cols-sm-2 row-cols-xl-4">
+            <div class="col">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6>Dispositivos</h6>
-                            <i class="bi bi-cpu fs-4 text-primary"></i>
+                            <h6 class="mb-0">Dispositivos</h6>
+                            <i class="bi bi-cpu fs-4 text-primary" aria-hidden="true"></i>
                         </div>
-                        <div class="fs-4 fw-semibold">—</div>
+                        <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.totalDispositivos : '—'}">—</div>
                         <small class="text-muted">Total registrados</small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6>En línea</h6>
-                            <i class="bi bi-wifi fs-4 text-success"></i>
+                            <h6 class="mb-0">En línea</h6>
+                            <i class="bi bi-wifi fs-4 text-success" aria-hidden="true"></i>
                         </div>
-                        <div class="fs-4 fw-semibold">—</div>
-                        <small class="text-muted">Conectados ahora</small>
+                        <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.enLinea : '—'}">—</div>
+                        <small class="text-muted">Dispositivos con telemetría reciente</small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6>Alertas</h6>
-                            <i class="bi bi-exclamation-triangle fs-4 text-warning"></i>
+                            <h6 class="mb-0">Alertas</h6>
+                            <i class="bi bi-bell fs-4 text-danger" aria-hidden="true"></i>
                         </div>
-                        <div class="fs-4 fw-semibold">—</div>
-                        <small class="text-muted">Últimas 24 h</small>
+                        <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.alertas24h : '—'}">—</div>
+                        <small class="text-muted">Últimas 24 horas</small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6>Eventos</h6>
-                            <i class="bi bi-activity fs-4 text-info"></i>
+                            <h6 class="mb-0">Muestras</h6>
+                            <i class="bi bi-activity fs-4 text-info" aria-hidden="true"></i>
                         </div>
-                        <div class="fs-4 fw-semibold">—</div>
-                        <small class="text-muted">Procesados hoy</small>
+                        <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.muestrasHoy : '—'}">—</div>
+                        <small class="text-muted">Telemetrías ingestadas hoy</small>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </main>
 
