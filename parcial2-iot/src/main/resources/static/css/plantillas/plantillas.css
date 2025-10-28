@@ -1,26 +1,200 @@
-.page{font-family: system-ui, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px;}
-.page .card{border:1px solid #ddd; border-radius:12px; padding:16px; margin-bottom:20px; background:#fff;}
-.page .row{display:flex; gap:12px; flex-wrap:wrap;}
-.page .col{flex:1 1 260px;}
-.page label{display:block; font-weight:600; margin-bottom:6px;}
-.page input[type=text], .page select, .page textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
-.page button, .page a.btn{padding:10px 16px; border:0; border-radius:10px; cursor:pointer; display:inline-block;}
-.page .btn-primary{background:#0d6efd; color:white;}
-.page .btn-secondary{background:#6c757d; color:white; text-decoration:none;}
-.page .btn-danger{background:#dc3545; color:white;}
-.page .errors{color:#b3261e; font-size:0.95rem; margin:8px 0;}
-.page table{width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;}
-.page th, .page td{padding:10px; border-bottom:1px solid #eee; text-align:left; vertical-align:middle;}
-.page th:last-child, .page td:last-child{width:1%; white-space:nowrap; text-align:right;}
-.page .badge{display:inline-block; padding:4px 8px; border-radius:999px; background:#eef; font-size:0.85rem;}
-.page .flash{padding:10px 12px; border-radius:10px; margin-bottom:14px;}
-.page .ok{background:#e7f7ee; color:#145d33;}
-.page .err{background:#fde7e9; color:#8a1220;}
+:root {
+    /* Paleta moderna */
+    --sb-bg: #111827;
+    --sb-bg-hover: #1f2937;
+    --sb-text: #e5e7eb;
+    --sb-accent: #3b82f6;
+    --sb-accent-light: #60a5fa;
+    --sb-border: rgba(255,255,255,0.08);
+    --sb-w: 260px;
+    --sb-w-collapsed: 78px;
+    --radius: 14px;
+    --transition: 0.3s cubic-bezier(.4, 0, .2, 1);
+    --shadow: 0 8px 24px rgba(0,0,0,0.15);
+    --z-sidebar: 1020;
+    --z-backdrop: 1010;
+    --z-fab: 1030;
+}
 
-/* En modo oscuro de SO, suaviza fondos (opcional) */
-@media (prefers-color-scheme: dark){
-    .page .card, .page table{background:#0b1220; border-color:#1b2440;}
-    .page th, .page td{border-bottom-color:#1b2440;}
-    .page input[type=text], .page select, .page textarea{background:#0f1730; color:#e7eaf3; border-color:#243056;}
-    .page .badge{background:#1a2548; color:#dbe4ff;}
+/* === Sidebar === */
+.app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--sb-w);
+    background: var(--sb-bg);
+    color: var(--sb-text);
+    z-index: var(--z-sidebar);
+    display: flex;
+    flex-direction: column;
+    transition: width var(--transition), transform var(--transition);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Header */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--sb-border);
+}
+
+.brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--sb-accent);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    color: var(--sb-text);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.sidebar-toggle:hover {
+    color: var(--sb-accent);
+}
+
+/* === Navegación === */
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0.5rem;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    margin: 0.25rem 0;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    color: var(--sb-text);
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    transition: background var(--transition), color var(--transition), transform 0.2s ease;
+}
+
+.sidebar-nav a svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.85;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+    background: var(--sb-bg-hover);
+    color: var(--sb-accent-light);
+    transform: translateX(4px);
+}
+.sidebar-nav a:hover svg {
+    transform: scale(1.1);
+}
+
+.sidebar-nav a.active {
+    background: var(--sb-accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+}
+
+/* === Contenido principal === */
+.app-content {
+    margin-left: var(--sb-w);
+    background: #f9fafb;
+    transition: margin-left var(--transition), background var(--transition);
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+/* === Sidebar colapsado === */
+body.sidebar-collapsed .app-sidebar {
+    width: var(--sb-w-collapsed);
+}
+
+body.sidebar-collapsed .app-content {
+    margin-left: var(--sb-w-collapsed);
+}
+
+body.sidebar-collapsed .brand {
+    display: none;
+}
+
+body.sidebar-collapsed .sidebar-nav a {
+    justify-content: center;
+    padding: 0.75rem;
+}
+body.sidebar-collapsed .sidebar-nav a .link-label {
+    display: none;
+}
+
+/* === Floating button en móvil === */
+.sidebar-fab {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: var(--z-fab);
+    background: var(--sb-accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    box-shadow: var(--shadow);
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.sidebar-fab:hover {
+    transform: scale(1.1);
+}
+
+/* === Responsive === */
+@media (max-width: 991.98px) {
+    .app-sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+    }
+    body.sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+    .app-content {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+}
+
+/* === Dark mode automático === */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --sb-bg: #0d1117;
+        --sb-bg-hover: #161b22;
+        --sb-text: #e6edf3;
+        --sb-border: #21262d;
+        --sb-accent: #58a6ff;
+        --sb-accent-light: #79c0ff;
+    }
+    .app-content {
+        background: #0d1117;
+        color: #e6edf3;
+    }
 }

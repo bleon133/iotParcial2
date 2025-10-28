@@ -55,6 +55,26 @@
                         <span class="link-label">Plantillas</span>
                     </a>
                 </li>
+
+                <li>
+                    <a th:href="@{/dispositivos}" th:classappend="${currentNav == 'dispositivos'} ? 'active'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor"
+                                  d="M12 20a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2zm6-6v-3a6 6 0 0 0-12 0v3l-2 2v1h16v-1l-2-2zM12 4a4 4 0 0 1 4 4v3H8V8a4 4 0 0 1 4-4z"/>
+                        </svg>
+                        <span class="link-label">dispositivos</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a th:href="@{/telemetria}" th:classappend="${currentNav == 'telemetria'} ? 'active'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor"
+                                  d="M3 3v18h18v-2H5V3H3zm16 4-4 7-3-3-4 6h14l-3-10z"/>
+                        </svg>
+                        <span class="link-label">telemetria</span>
+                    </a>
+                </li>
                 <!-- Más entradas: usa th:classappend="${currentNav == 'xxx'} ? 'active'" -->
             </ul>
         </nav>

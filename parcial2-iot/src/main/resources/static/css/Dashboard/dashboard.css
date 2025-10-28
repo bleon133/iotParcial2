@@ -1,0 +1,54 @@
+
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.app-content {
+    margin-left: 250px;
+    transition: all 0.3s ease;
+}
+
+/* Títulos */
+h1.display-5 {
+    color: #1d3557;
+}
+
+/* Tarjetas */
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.card-body h6 {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.card-body .fs-4 {
+    color: #007bff;
+}
+
+/* Contenedor de tarjetas */
+.row.g-3 > [class*='col-'],
+.row.g-4 > [class*='col-'] {
+    display: flex;
+}
+
+/* Caja inferior */
+.card-body.text-center {
+    color: #6c757d;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+    .app-content {
+        margin-left: 0;
+    }
+}

@@ -1,69 +1,82 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<!-- Head base (trae Bootstrap y el <title> con ${titulo}) -->
-<head th:replace="~{components/bootstrap :: head-bootstrap}"></head>
+<head th:replace="~{components/bootstrap :: head-bootstrap}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <title th:text="${titulo} ?: 'Dashboard'">Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
+</head>
 
-<body class="bg-light">
+<body>
+<!-- Sidebar -->
 <div th:replace="~{components/sidebar :: sidebar}"></div>
 
+<!-- Contenido principal -->
 <main class="app-content">
-    <div class="container py-4">
-        <!-- Título -->
-        <div class="text-center mb-4">
+    <div class="container py-5">
+        <!-- Encabezado -->
+        <div class="text-center mb-5">
             <h1 class="display-5 fw-bold" th:text="${titulo} ?: 'Dashboard'">Dashboard</h1>
-            <p class="lead mb-0">Sistema básico para la gestión y monitoreo de datos IoT.</p>
+            <p class="lead mb-0 text-secondary">Panel general para la supervisión y análisis de dispositivos IoT.</p>
         </div>
 
-        <!-- Tarjetas de ejemplo (responsivas) -->
-        <div class="row g-3 mb-4">
+        <!-- Tarjetas principales -->
+        <div class="row g-4 mb-5">
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h6 class="text-muted mb-1">Dispositivos</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6>Dispositivos</h6>
+                            <i class="bi bi-cpu fs-4 text-primary"></i>
+                        </div>
                         <div class="fs-4 fw-semibold">—</div>
                         <small class="text-muted">Total registrados</small>
                     </div>
                 </div>
             </div>
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h6 class="text-muted mb-1">En línea</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6>En línea</h6>
+                            <i class="bi bi-wifi fs-4 text-success"></i>
+                        </div>
                         <div class="fs-4 fw-semibold">—</div>
                         <small class="text-muted">Conectados ahora</small>
                     </div>
                 </div>
             </div>
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h6 class="text-muted mb-1">Alertas</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6>Alertas</h6>
+                            <i class="bi bi-exclamation-triangle fs-4 text-warning"></i>
+                        </div>
                         <div class="fs-4 fw-semibold">—</div>
                         <small class="text-muted">Últimas 24 h</small>
                     </div>
                 </div>
             </div>
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h6 class="text-muted mb-1">Eventos</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6>Eventos</h6>
+                            <i class="bi bi-activity fs-4 text-info"></i>
+                        </div>
                         <div class="fs-4 fw-semibold">—</div>
                         <small class="text-muted">Procesados hoy</small>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Área para futuros componentes -->
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <p class="text-muted mb-0">Aquí irá el contenido del dashboard.</p>
-            </div>
-        </div>
     </div>
 </main>
 
-<!-- Scripts base (Bootstrap bundle, etc.) -->
+<!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
 </body>
 </html>
