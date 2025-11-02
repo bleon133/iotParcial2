@@ -20,6 +20,16 @@
     transition: transform .25s ease, width var(--transition);
 }
 
+/* Ocultar el botón de menú cuando el sidebar esté expandido */
+.sidebar.expanded .menu-toggle {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -129,4 +139,19 @@ body.sidebar-collapsed .sidebar-nav a .link-label { display: none; }
 /* Accesibilidad: reduce animaciones si el user lo pide */
 @media (prefers-reduced-motion: reduce){
     .app-sidebar, .app-content, .sidebar-backdrop { transition: none !important; }
+}
+
+.btn-glass {
+    border: none;
+    background: var(--gl-card-bg);
+    color: var(--gl-text);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    transition: background 0.3s;
+    backdrop-filter: blur(8px);
+}
+
+.btn-glass:hover {
+    background: var(--sb-accent);
+    color: #fff;
 }

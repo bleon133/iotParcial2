@@ -1,20 +1,29 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <!-- Head base (Bootstrap, jQuery, etc.) -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:attr="data-theme=${#strings.defaultString(session.theme, 'light')}">
+<head xmlns:th="http://www.thymeleaf.org">
+    <!-- Head base -->
     <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
 
-    <!-- Estilos específicos de esta página -->
-    <link rel="stylesheet" th:href="@{/css/nav/nav.css}">
+    <!-- Estilos -->
+    <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
     <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
-    <!-- Iconos de Bootstrap (necesarios para .bi) -->
     <link rel="stylesheet" th:href="@{/library/bootstrap-icons/bootstrap-icons.min.css}">
     <title th:text="${titulo} ?: 'Dashboard'">Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body class="bg-light">
+
+<body class="glasslight">
 <div th:replace="~{components/sidebar :: sidebar}"></div>
 
+<!-- Botón flotante para abrir menú lateral en dispositivos móviles -->
+<button class="sidebar-fab" onclick="toggleSidebar()" aria-label="Abrir menú lateral">
+    <i class="bi bi-list" style="font-size: 1.4rem;"></i>
+</button>
+
+<!-- Fondo oscuro detrás del menú cuando está abierto -->
+<div class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<!-- Contenido principal -->
 <main class="app-content">
     <div class="container-fluid py-4">
         <header class="mb-4">
@@ -24,14 +33,14 @@
             <p class="lead text-secondary mb-0">Panel general para la supervisión y análisis de dispositivos IoT.</p>
         </header>
 
-        <!-- Métricas: grid auto-adaptable -->
+        <!-- Métricas (KPIs) -->
         <section class="row g-4 row-cols-1 row-cols-sm-2 row-cols-xl-4">
             <div class="col">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 glass-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">Dispositivos</h6>
-                            <i class="bi bi-cpu fs-4 text-primary" aria-hidden="true"></i>
+                            <i class="bi bi-cpu fs-4 text-primary"></i>
                         </div>
                         <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.totalDispositivos : '—'}">—</div>
                         <small class="text-muted">Total registrados</small>
@@ -40,11 +49,11 @@
             </div>
 
             <div class="col">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 glass-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">En línea</h6>
-                            <i class="bi bi-wifi fs-4 text-success" aria-hidden="true"></i>
+                            <i class="bi bi-wifi fs-4 text-success"></i>
                         </div>
                         <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.enLinea : '—'}">—</div>
                         <small class="text-muted">Dispositivos con telemetría reciente</small>
@@ -53,11 +62,11 @@
             </div>
 
             <div class="col">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 glass-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">Alertas</h6>
-                            <i class="bi bi-bell fs-4 text-danger" aria-hidden="true"></i>
+                            <i class="bi bi-bell fs-4 text-danger"></i>
                         </div>
                         <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.alertas24h : '—'}">—</div>
                         <small class="text-muted">Últimas 24 horas</small>
@@ -66,11 +75,11 @@
             </div>
 
             <div class="col">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 glass-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">Muestras</h6>
-                            <i class="bi bi-activity fs-4 text-info" aria-hidden="true"></i>
+                            <i class="bi bi-activity fs-4 text-info"></i>
                         </div>
                         <div class="fs-4 fw-semibold" th:text="${kpis != null ? kpis.muestrasHoy : '—'}">—</div>
                         <small class="text-muted">Telemetrías ingestadas hoy</small>
@@ -83,5 +92,22 @@
 
 <!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Nav + lógica de tema -->
+<script th:src="@{/js/nav/nav.js}" defer></script>
+
+<!-- Debug (puedes quitarlo luego) -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("Theme actual:", document.documentElement.getAttribute("data-theme"));
+    });
+</script>
+<div class="sidebar-backdrop" onclick="closeSidebar()"></div>
 </body>
 </html>

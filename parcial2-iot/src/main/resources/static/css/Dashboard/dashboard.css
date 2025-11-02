@@ -1,62 +1,85 @@
-/* ========== Dashboard (NO tocar layout del sidebar) ========== */
+/* ==========================================================
+   DASHBOARD - Integración total con Glasslight System
+   ========================================================== */
 
-/* Base */
-body {
-    background-color: #f4f6f9;
+/* Fondo y color general */
+body, html {
+    background: var(--gl-bg) !important;
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: var(--gl-text);
     font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background var(--transition), color var(--transition);
 }
 
-/* Encabezado de página */
+/* Contenedor principal */
+.app-content {
+    background: transparent !important;
+    min-height: 100vh;
+    padding-bottom: 2rem;
+}
+
+/* Encabezado */
 .page-header {
     margin-bottom: 1.25rem;
 }
 .page-title {
-    color: #1d3557;
+    color: var(--gl-text);
     font-weight: 700;
     line-height: 1.1;
-    /* tamaño responsivo sin depender de clases de Bootstrap concretas */
     font-size: clamp(1.5rem, 3.5vw, 2.25rem);
 }
 .page-subtitle {
-    color: #6c757d;
-    margin: 0;
+    color: rgba(100,100,100,0.75);
 }
 
 /* Tarjetas KPI */
 .card {
     border: none;
-    border-radius: 12px;
-    transition: transform .2s ease, box-shadow .2s ease;
-    background: #fff;
+    border-radius: 14px;
+    background: var(--gl-card-bg);
+    color: var(--gl-text);
+    border: 1px solid var(--gl-border);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform .2s ease, box-shadow .2s ease, background var(--transition);
 }
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
 }
 
 .card-body h6 {
-    color: #6c757d;
+    color: rgba(100,100,100,0.85);
     font-weight: 600;
     letter-spacing: .2px;
     margin-bottom: .25rem;
 }
 
+.metric-value,
+.card-body .fs-4 {
+    color: var(--sb-accent);
+    font-weight: 700 !important;
+}
+
+/* Iconos */
 .kpi-icon,
 .card-body i.bi {
     line-height: 1;
 }
 
-/* Valor principal de KPI */
-.metric-value,
-.card-body .fs-4 {
-    color: #007bff;
-    font-weight: 700 !important;
+/* Textos secundarios */
+.card small,
+.card .text-muted {
+    color: rgba(120,120,120,0.85) !important;
 }
 
-/* Igualar alturas en el grid de KPIs */
+/* Igualar alturas */
 .row.g-3 > [class*="col-"],
 .row.g-4 > [class*="col-"] {
     display: flex;
@@ -66,23 +89,29 @@ body {
     width: 100%;
 }
 
-/* Textos secundarios dentro de tarjetas */
-.card small,
-.card .text-muted {
-    color: #6c757d !important;
+/* ======== Modo Oscuro ======== */
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+    background: var(--gl-bg) !important;
+    color: var(--gl-text);
 }
 
-/* Helpers */
-.shadow-soft {
-    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+[data-theme="dark"] .page-subtitle {
+    color: rgba(230,230,230,0.7);
+}
+[data-theme="dark"] .card-body h6 {
+    color: rgba(230,230,230,0.8);
+}
+[data-theme="dark"] .card small {
+    color: rgba(200,200,200,0.7) !important;
 }
 
-/* Responsivo (NO tocar .app-content; lo gestiona nav.css) */
+/* ======== Responsivo ======== */
 @media (max-width: 991.98px) {
     .page-header { margin-bottom: 1rem; }
 }
 
-/* Accesibilidad: si el usuario prefiere menos movimiento */
+/* ======== Accesibilidad ======== */
 @media (prefers-reduced-motion: reduce) {
     .card { transition: none !important; }
 }

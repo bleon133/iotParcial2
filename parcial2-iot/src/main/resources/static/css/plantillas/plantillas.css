@@ -1,74 +1,80 @@
-/* ========== Plantillas ========== */
+/* === Plantillas: CRUD y gestión === */
 
-/* Encabezado de página (armonizado con dashboard.css) */
-.page-header {
-    margin-bottom: 1.25rem;
+body {
+    background: var(--gl-bg);
+    color: var(--gl-text);
 }
-.page-title {
-    color: #1d3557;
+
+.app-content {
+    margin-left: var(--sb-w);
+    padding: 2rem;
+}
+
+/* Contenedor principal */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.8rem;
+}
+
+.section-header h2 {
+    color: var(--sb-accent);
     font-weight: 700;
-    line-height: 1.1;
-    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
-}
-.page-subtitle {
-    color: #6c757d;
-    margin: 0 0 .25rem 0;
 }
 
-/* Subtítulos de secciones */
-.section-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #334155;
+/* Tabla principal */
+.table {
+    background: var(--gl-card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--gl-border);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
 }
 
-/* Tarjetas */
-.card {
+.table thead {
+    background: var(--sb-accent);
+    color: #fff;
+}
+
+.table tbody tr {
+    transition: background 0.2s;
+}
+
+.table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+/* Botones */
+.btn-primary {
+    background: var(--sb-accent);
     border: none;
-    border-radius: 12px;
-    background: #fff;
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: all 0.2s;
 }
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+
+.btn-primary:hover {
+    background: var(--sb-accent-light);
 }
-.shadow-soft {
-    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+
+.btn-outline-primary {
+    border-color: var(--sb-accent);
+    color: var(--sb-accent);
+}
+
+.btn-outline-primary:hover {
+    background: var(--sb-accent);
+    color: #fff;
 }
 
 /* Formularios */
-.form-label { margin-bottom: .35rem; }
-.form-control, .form-select, textarea.form-control {
+.form-control {
     border-radius: 10px;
-}
-.is-invalid { border-color: #dc3545; }
-
-/* Tablas */
-.table thead th {
-    font-weight: 600;
-    color: #475569;
-}
-.table td, .table th {
-    vertical-align: middle;
-}
-.table .text-truncate {
-    max-width: 420px;
+    border: 1px solid var(--gl-border);
+    background: var(--gl-card-bg);
+    color: var(--gl-text);
 }
 
-/* Badges */
-.badge { border-radius: 999px; }
-
-/* Alerts */
-.alert { border-radius: 10px; }
-
-/* Responsivo */
-@media (max-width: 991.98px) {
-    .page-header { margin-bottom: 1rem; }
-    .table .text-truncate { max-width: 260px; }
-}
-
-/* Accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-    .card { transition: none !important; }
+.form-control:focus {
+    border-color: var(--sb-accent);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
 }
