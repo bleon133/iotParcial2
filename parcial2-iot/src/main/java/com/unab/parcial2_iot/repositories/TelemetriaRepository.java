@@ -25,6 +25,14 @@ public interface TelemetriaRepository extends JpaRepository<Telemetria, Long> {
         String getValorJson();           // <-- CAMBIAR a String
     }
 
+    interface AggRow {
+        Double getAvg();
+        Double getMin();
+        Double getMax();
+        Long getCnt();
+    }
+
+
     @Query(value = """
                 select
                   t.dispositivo_id          as dispositivoId,
@@ -41,4 +49,18 @@ public interface TelemetriaRepository extends JpaRepository<Telemetria, Long> {
                 limit :limit
             """, nativeQuery = true)
     List<TelemetriaRow> ultimas(UUID disp, UUID var, int limit);
+    @org.springframework.data.jpa.repository.Query(value =
+            "SELECT avg(valor_numero) AS avg, " +
+                    "       min(valor_numero) AS min, " +
+                    "       max(valor_numero) AS max, " +
+                    "       count(*)          AS cnt " +
+                    "FROM iot.telemetria " +
+                    "WHERE dispositivo_id = :dispId " +
+                    "  AND variable_plantilla_id = :varId " +
+                    "  AND ts >= :since " +
+                    "  AND valor_numero IS NOT NULL",
+            nativeQuery = true)
+    AggRow agg(java.util.UUID dispId,
+               java.util.UUID varId,
+               java.time.OffsetDateTime since);
 }

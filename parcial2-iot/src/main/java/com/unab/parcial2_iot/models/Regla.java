@@ -2,7 +2,7 @@ package com.unab.parcial2_iot.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.UUID;
 import java.time.OffsetDateTime;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

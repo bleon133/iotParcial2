@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Alertas</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css"/>
+</head>
+<body class="p-4">
+<h3>Alertas</h3>
+
+<form class="row g-2 mb-3" method="get" action="/alertas">
+    <div class="col-auto">
+        <select class="form-select" name="filtroTipo">
+            <option value="">Todas</option>
+            <option value="regla" th:selected="${filtroTipo=='regla'}">Por regla</option>
+            <option value="dispositivo" th:selected="${filtroTipo=='dispositivo'}">Por dispositivo</option>
+        </select>
+    </div>
+    <div class="col-auto" th:if="${filtroTipo=='regla'}">
+        <select class="form-select" name="id">
+            <option th:each="r : ${reglas}" th:value="${r.id}" th:text="${r.nombre}"
+                    th:selected="${filtroId != null and r.id.equals(filtroId)}"></option>
+        </select>
+    </div>
+    <div class="col-auto" th:if="${filtroTipo=='dispositivo'}">
+        <select class="form-select" name="id">
+            <option th:each="d : ${dispositivos}" th:value="${d.id}" th:text="${d.nombre}"
+                    th:selected="${filtroId != null and d.id.equals(filtroId)}"></option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-sm table-bordered align-middle">
+    <thead>
+    <tr>
+        <th>Fecha</th>
+        <th>Regla</th>
+        <th>Dispositivo</th>
+        <th>Detalles (JSON)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${alertas}">
+        <td th:text="${#temporals.format(a.ts, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        <td><span th:text="${a.reglaNombre}"></span></td>
+        <td><span th:text="${a.dispositivoNombre}"></span></td>
+        <td><pre class="mb-0" th:text="${a.detallesJson}"></pre></td>
+    </tr>
+    </tbody>
+</table>
+
+<nav th:if="${page != null}">
+    <ul class="pagination">
+        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+            <a class="page-link" th:href="@{|/alertas?page=${page.number-1}&size=${page.size}|}">Anterior</a>
+        </li>
+        <li class="page-item disabled"><a class="page-link" th:text="${page.number+1}"></a></li>
+        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+            <a class="page-link" th:href="@{|/alertas?page=${page.number+1}&size=${page.size}|}">Siguiente</a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

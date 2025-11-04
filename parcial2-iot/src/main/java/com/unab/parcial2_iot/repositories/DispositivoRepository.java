@@ -16,4 +16,6 @@ public interface DispositivoRepository extends JpaRepository<Dispositivo, UUID> 
     List<Dispositivo> findAllByOrderByCreadoEnDesc();
 
     Optional<Dispositivo> findByIdExternoIgnoreCase(String idExterno);
+
+    List<Dispositivo> findByPlantilla_Id(UUID plantillaId);
 }
