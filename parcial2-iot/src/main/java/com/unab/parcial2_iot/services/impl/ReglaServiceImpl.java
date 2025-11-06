@@ -84,12 +84,12 @@ public class ReglaServiceImpl implements ReglaService {
 
     @Override
     public List<Regla> listarTodas() {
-        return reglaRepo.findAll();
+        return reglaRepo.findAllConVariable(); // ya viene con variable cargada
     }
 
     @Override
     public List<Regla> listarHabilitadas() {
-        return reglaRepo.findByHabilitadaTrue();
+        return reglaRepo.findByHabilitadaTrueConVariable(); // para el job si quieres evitar lazy
     }
 
     @Scheduled(fixedDelayString = "${app.rules.fixedDelay:60000}")

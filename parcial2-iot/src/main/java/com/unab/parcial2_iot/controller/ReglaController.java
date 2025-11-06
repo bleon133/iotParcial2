@@ -43,15 +43,16 @@ public class ReglaController {
     @PostMapping("/{id}/toggle")
     public String toggle(@PathVariable UUID id) {
         Regla r = reglaService.listarTodas().stream()
-                .filter(x -> x.getId().equals(id)).findFirst()
+                .filter(x -> x.getId().equals(id))
+                .findFirst()
                 .orElseThrow();
 
-        var in = new ReglaIn();
-        in.setVariableId(r.getVariable().getId());      // <-- variable
+        ReglaIn in = new ReglaIn();
+        in.setVariableId(r.getVariable().getId());   // <- aquí
         in.setNombre(r.getNombre());
         in.setExpresion(r.getExpresion());
         in.setSeveridad(r.getSeveridad());
-        in.setHabilitada(!r.isHabilitada());                     // <-- isHabilitada()
+        in.setHabilitada(!r.isHabilitada());
         in.setVentanaSegundos(r.getVentanaSegundos());
 
         reglaService.actualizar(id, in);

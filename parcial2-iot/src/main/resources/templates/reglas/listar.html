@@ -52,7 +52,10 @@
                             <tbody>
                             <tr th:each="r : ${reglas}">
                                 <td th:text="${r.nombre}"></td>
-                                <td th:text="${r.variable.etiqueta != null ? r.variable.etiqueta : r.variable.nombre}"></td>
+                                <td th:text="${r.variable != null && r.variable.etiqueta != null
+                                  ? r.variable.etiqueta
+                                  : (r.variable != null ? r.variable.nombre : '—')}">
+                                </td>
                                 <td th:text="${r.expresion}"></td>
                                 <td th:text="${r.severidad}"></td>
                                 <td th:text="${r.ventanaSegundos}"></td>
@@ -90,9 +93,11 @@
                         <form method="post" action="/reglas">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Variable</label>
-                                <select class="form-select" name="variablePlantillaId" required>
-                                    <option th:each="v : ${variables}" th:value="${v.id}"
-                                            th:text="${v.etiqueta != null ? v.etiqueta : v.nombre}"></option>
+                                <select class="form-select" name="variableId" required>
+                                    <option th:each="v : ${variables}"
+                                            th:value="${v.id}"
+                                            th:text="${v.etiqueta != null ? v.etiqueta : v.nombre}">
+                                    </option>
                                 </select>
                             </div>
 
@@ -103,7 +108,30 @@
 
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Expresión</label>
-                                <input class="form-control" name="expresion" required placeholder="avg_5m > 50"/>
+                                <input
+                                        class="form-control"
+                                        name="expresion"
+                                        required
+                                        placeholder="avg_5m > 50"
+                                        pattern="(avg|min|max)(?:_\d+(?:s|m|h))?\s*(>=|<=|>|<|==|=)\s*[+-]?\d+(?:\.\d+)?"
+                                />
+                                <div class="form-text">
+                                    Formato: <code>{avg|min|max}[_Ns|_Nm|_Nh]</code> <code>{operador}</code> <code>{número}</code><br/>
+                                    Operadores permitidos: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>=</code>, <code>==</code><br/>
+                                    Donde:
+                                    <ul class="mb-1">
+                                        <li><code>_Ns</code> = ventana de N segundos</li>
+                                        <li><code>_Nm</code> = ventana de N minutos</li>
+                                        <li><code>_Nh</code> = ventana de N horas</li>
+                                    </ul>
+                                    Ejemplos válidos:
+                                    <code>avg &gt; 50</code>,
+                                    <code>avg_5m &gt; 50</code>,
+                                    <code>min &lt; 20</code>,
+                                    <code>max &gt;= 90</code>,
+                                    <code>avg_30s &gt;= 10</code>,
+                                    <code>max_1h &lt; 80</code>
+                                </div>
                             </div>
 
                             <div class="mb-3">
