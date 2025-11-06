@@ -1,67 +1,124 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Alertas</title>
-    <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css"/>
+    <meta charset="UTF-8">
+    <title>Alertas - IoT Admin</title>
+
+    <!-- Head base -->
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+
+    <!-- Estilos Glasslight -->
+    <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+    <link rel="stylesheet" th:href="@{/library/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
 </head>
-<body class="p-4">
-<h3>Alertas</h3>
 
-<form class="row g-2 mb-3" method="get" action="/alertas">
-    <div class="col-auto">
-        <select class="form-select" name="filtroTipo">
-            <option value="">Todas</option>
-            <option value="regla" th:selected="${filtroTipo=='regla'}">Por regla</option>
-            <option value="dispositivo" th:selected="${filtroTipo=='dispositivo'}">Por dispositivo</option>
-        </select>
-    </div>
-    <div class="col-auto" th:if="${filtroTipo=='regla'}">
-        <select class="form-select" name="id">
-            <option th:each="r : ${reglas}" th:value="${r.id}" th:text="${r.nombre}"
-                    th:selected="${filtroId != null and r.id.equals(filtroId)}"></option>
-        </select>
-    </div>
-    <div class="col-auto" th:if="${filtroTipo=='dispositivo'}">
-        <select class="form-select" name="id">
-            <option th:each="d : ${dispositivos}" th:value="${d.id}" th:text="${d.nombre}"
-                    th:selected="${filtroId != null and d.id.equals(filtroId)}"></option>
-        </select>
-    </div>
-    <div class="col-auto">
-        <button class="btn btn-primary">Filtrar</button>
-    </div>
-</form>
+<body class="glasslight">
+<!-- Sidebar -->
+<div th:replace="~{components/sidebar :: sidebar}"></div>
 
-<table class="table table-sm table-bordered align-middle">
-    <thead>
-    <tr>
-        <th>Fecha</th>
-        <th>Regla</th>
-        <th>Dispositivo</th>
-        <th>Detalles (JSON)</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="a : ${alertas}">
-        <td th:text="${#temporals.format(a.ts, 'yyyy-MM-dd HH:mm:ss')}"></td>
-        <td><span th:text="${a.reglaNombre}"></span></td>
-        <td><span th:text="${a.dispositivoNombre}"></span></td>
-        <td><pre class="mb-0" th:text="${a.detallesJson}"></pre></td>
-    </tr>
-    </tbody>
-</table>
+<!-- Contenido principal -->
+<main class="app-content">
+    <div class="container-fluid py-4">
+        <header class="mb-4">
+            <h1 class="fw-bold lh-1 mb-1" style="font-size:clamp(1.5rem, 3.5vw, 2.25rem);">
+                Registro de Alertas
+            </h1>
+            <p class="lead text-secondary mb-0">
+                Monitorea las alertas generadas por reglas o dispositivos IoT.
+            </p>
+        </header>
 
-<nav th:if="${page != null}">
-    <ul class="pagination">
-        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
-            <a class="page-link" th:href="@{|/alertas?page=${page.number-1}&size=${page.size}|}">Anterior</a>
-        </li>
-        <li class="page-item disabled"><a class="page-link" th:text="${page.number+1}"></a></li>
-        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
-            <a class="page-link" th:href="@{|/alertas?page=${page.number+1}&size=${page.size}|}">Siguiente</a>
-        </li>
-    </ul>
-</nav>
+        <!-- FILTROS -->
+        <section class="glass-card p-3 mb-4 shadow-sm">
+            <form class="row g-3 align-items-end" method="get" action="/alertas">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tipo de alerta</label>
+                    <select class="form-select" name="filtroTipo">
+                        <option value="">Todas</option>
+                        <option value="regla" th:selected="${filtroTipo=='regla'}">Por regla</option>
+                        <option value="dispositivo" th:selected="${filtroTipo=='dispositivo'}">Por dispositivo</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" th:if="${filtroTipo=='regla'}">
+                    <label class="form-label fw-semibold">Regla</label>
+                    <select class="form-select" name="id">
+                        <option th:each="r : ${reglas}" th:value="${r.id}"
+                                th:text="${r.nombre}"
+                                th:selected="${filtroId != null and r.id.equals(filtroId)}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" th:if="${filtroTipo=='dispositivo'}">
+                    <label class="form-label fw-semibold">Dispositivo</label>
+                    <select class="form-select" name="id">
+                        <option th:each="d : ${dispositivos}" th:value="${d.id}"
+                                th:text="${d.nombre}"
+                                th:selected="${filtroId != null and d.id.equals(filtroId)}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- TABLA DE ALERTAS -->
+        <section class="glass-card p-3 shadow-sm">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Regla</th>
+                        <th>Dispositivo</th>
+                        <th>Detalles (JSON)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${alertas}">
+                        <td th:text="${#temporals.format(a.ts, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td th:text="${a.reglaNombre}"></td>
+                        <td th:text="${a.dispositivoNombre}"></td>
+                        <td><pre class="mb-0 text-wrap small" style="white-space: pre-wrap;" th:text="${a.detallesJson}"></pre></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINACIÓN -->
+            <nav class="mt-3" th:if="${page != null}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/alertas?page=${page.number-1}&size=${page.size}|}">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link" th:text="${page.number+1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/alertas?page=${page.number+1}&size=${page.size}|}">
+                            Siguiente <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+
+    </div>
+</main>
+
+<!-- Scripts base -->
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+<!-- jQuery + Nav logic -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script th:src="@{/js/nav/nav.js}" defer></script>
+
 </body>
 </html>

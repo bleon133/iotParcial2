@@ -47,7 +47,7 @@ public class ReglaController {
                 .orElseThrow();
 
         var in = new ReglaIn();
-        in.setVariablePlantillaId(r.getVariable().getId());      // <-- variable
+        in.setVariableId(r.getVariable().getId());      // <-- variable
         in.setNombre(r.getNombre());
         in.setExpresion(r.getExpresion());
         in.setSeveridad(r.getSeveridad());

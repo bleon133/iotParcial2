@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class ReglaIn {
     @NotNull
-    private UUID variablePlantillaId;
+    private UUID variableId;
     @NotNull
     private String nombre;
     @NotNull

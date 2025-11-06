@@ -1,84 +1,146 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Reglas</title>
-    <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css"/>
+    <meta charset="UTF-8">
+    <title>Reglas - IoT Admin</title>
+
+    <!-- Head base -->
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+
+    <!-- Estilos Glasslight -->
+    <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+    <link rel="stylesheet" th:href="@{/library/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/Dashboard/dashboard.css}">
 </head>
-<body class="p-4">
-<h3>Reglas</h3>
 
-<div class="row">
-    <div class="col-md-7">
-        <table class="table table-bordered table-sm align-middle">
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Variable</th>
-                <th>Expresión</th>
-                <th>Severidad</th>
-                <th>Ventana (s)</th>
-                <th>Habilitada</th>
-                <th>Acciones</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="r : ${reglas}">
-                <td th:text="${r.nombre}"></td>
-                <td th:text="${r.variablePlantilla.etiqueta != null ? r.variablePlantilla.etiqueta : r.variablePlantilla.nombre}"></td>
-                <td th:text="${r.expresion}"></td>
-                <td th:text="${r.severidad}"></td>
-                <td th:text="${r.ventanaSegundos}"></td>
-                <td>
-                    <span th:text="${r.habilitada ? 'Sí' : 'No'}" th:classappend="${r.habilitada} ? 'text-success' : 'text-danger'"></span>
-                </td>
-                <td class="d-flex gap-1">
-                    <form th:action="@{|/reglas/${r.id}/toggle|}" method="post">
-                        <button class="btn btn-sm btn-secondary" type="submit">On/Off</button>
-                    </form>
-                    <form th:action="@{|/reglas/${r.id}/eliminar|}" method="post" onsubmit="return confirm('¿Eliminar regla?');">
-                        <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+<body class="glasslight">
+<!-- Sidebar -->
+<div th:replace="~{components/sidebar :: sidebar}"></div>
 
-    <div class="col-md-5">
-        <h5>Nueva/Editar Regla</h5>
-        <form method="post" action="/reglas">
-            <div class="mb-2">
-                <label class="form-label">Variable</label>
-                <select class="form-select" name="variablePlantillaId" required>
-                    <option th:each="v : ${variables}" th:value="${v.id}"
-                            th:text="${v.etiqueta != null ? v.etiqueta : v.nombre}"></option>
-                </select>
+<!-- Contenido principal -->
+<main class="app-content">
+    <div class="container-fluid py-4">
+        <header class="mb-4">
+            <h1 class="fw-bold lh-1 mb-1" style="font-size:clamp(1.5rem, 3.5vw, 2.25rem);">
+                Gestión de Reglas
+            </h1>
+            <p class="lead text-secondary mb-0">
+                Crea, edita y administra las reglas de alertas basadas en variables IoT.
+            </p>
+        </header>
+
+        <div class="row g-4">
+            <!-- Tabla de reglas existentes -->
+            <div class="col-lg-7">
+                <div class="card glass-card shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">Listado de Reglas</h5>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table align-middle table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Variable</th>
+                                <th>Expresión</th>
+                                <th>Severidad</th>
+                                <th>Ventana (s)</th>
+                                <th>Habilitada</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="r : ${reglas}">
+                                <td th:text="${r.nombre}"></td>
+                                <td th:text="${r.variable.etiqueta != null ? r.variable.etiqueta : r.variable.nombre}"></td>
+                                <td th:text="${r.expresion}"></td>
+                                <td th:text="${r.severidad}"></td>
+                                <td th:text="${r.ventanaSegundos}"></td>
+                                <td>
+                                    <span th:text="${r.habilitada ? 'Sí' : 'No'}"
+                                          th:classappend="${r.habilitada} ? 'text-success fw-semibold' : 'text-danger fw-semibold'"></span>
+                                </td>
+                                <td class="text-center">
+                                    <form th:action="@{|/reglas/${r.id}/toggle|}" method="post" class="d-inline-block">
+                                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                                            <i class="bi bi-toggle-on"></i> On/Off
+                                        </button>
+                                    </form>
+                                    <form th:action="@{|/reglas/${r.id}/eliminar|}" method="post"
+                                          onsubmit="return confirm('¿Eliminar regla?');" class="d-inline-block">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="mb-2">
-                <label class="form-label">Nombre</label>
-                <input class="form-control" name="nombre" required placeholder="Temp alta 5m"/>
+
+            <!-- Formulario para crear o editar -->
+            <div class="col-lg-5">
+                <div class="card glass-card shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">Nueva / Editar Regla</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/reglas">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Variable</label>
+                                <select class="form-select" name="variablePlantillaId" required>
+                                    <option th:each="v : ${variables}" th:value="${v.id}"
+                                            th:text="${v.etiqueta != null ? v.etiqueta : v.nombre}"></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nombre</label>
+                                <input class="form-control" name="nombre" required placeholder="Temperatura alta 5m"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Expresión</label>
+                                <input class="form-control" name="expresion" required placeholder="avg_5m > 50"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Severidad</label>
+                                <input class="form-control" name="severidad" value="info"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Ventana (segundos)</label>
+                                <input class="form-control" name="ventanaSegundos" type="number" value="300" min="1"/>
+                                <div class="form-text">
+                                    Si la expresión incluye _5m / _30s / _1h, este valor será ignorado.
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" name="habilitada" checked/>
+                                <label class="form-check-label">Habilitada</label>
+                            </div>
+
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-save me-2"></i>Guardar
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="mb-2">
-                <label class="form-label">Expresión</label>
-                <input class="form-control" name="expresion" required placeholder="avg_5m > 50"/>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Severidad</label>
-                <input class="form-control" name="severidad" value="info"/>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Ventana (segundos)</label>
-                <input class="form-control" name="ventanaSegundos" type="number" value="300" min="1"/>
-                <div class="form-text">Si la expresión trae _5m/_30s/_1h, tiene prioridad sobre este valor.</div>
-            </div>
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="habilitada" checked/>
-                <label class="form-check-label">Habilitada</label>
-            </div>
-            <button class="btn btn-primary">Guardar</button>
-        </form>
+        </div>
+
     </div>
-</div>
+</main>
+
+<!-- Scripts base -->
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+<!-- jQuery y lógica del nav -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script th:src="@{/js/nav/nav.js}" defer></script>
 </body>
 </html>

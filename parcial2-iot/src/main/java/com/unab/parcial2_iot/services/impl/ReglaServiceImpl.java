@@ -29,19 +29,24 @@ public class ReglaServiceImpl implements ReglaService {
     private final TelemetriaRepository teleRepo;
     private final AlertaService alertaService;
 
-    // "avg > 50", "avg_5m > 50", "min < 20", "max >= 90"
+    // Formato aceptado de expresión:
+    //   avg > 50
+    //   avg_5m > 50
+    //   min < 20
+    //   max >= 90
+    //   avg Temperatura > 50  <-- ahora permitido
     private static final Pattern EXP = Pattern.compile(
-            "(?i)^(avg|min|max)(?:_(\\d+)([smh]))?\\s*(>=|<=|>|<|==|=)\\s*([+-]?\\d+(?:\\.\\d+)?)$"
+            "(?i)^(avg|min|max)(?:\\s+\\w+)?(?:_(\\d+)([smh]))?\\s*(>=|<=|>|<|==|=)\\s*([+-]?\\d+(?:\\.\\d+)?)$"
     );
 
     @Override
     @Transactional
     public Regla crear(ReglaIn in) {
-        VariablePlantilla var = varRepo.findById(in.getVariablePlantillaId())
+        VariablePlantilla var = varRepo.findById(in.getVariableId())
                 .orElseThrow(() -> new IllegalArgumentException("VariablePlantilla no existe"));
 
         Regla r = Regla.builder()
-                .variable(var) // <-- nombre correcto según tu entidad
+                .variable(var)
                 .nombre(in.getNombre())
                 .expresion(in.getExpresion().trim())
                 .severidad(in.getSeveridad() == null ? "info" : in.getSeveridad())
@@ -59,10 +64,10 @@ public class ReglaServiceImpl implements ReglaService {
         Regla r = reglaRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Regla no existe"));
 
-        VariablePlantilla var = varRepo.findById(in.getVariablePlantillaId())
+        VariablePlantilla var = varRepo.findById(in.getVariableId())
                 .orElseThrow(() -> new IllegalArgumentException("VariablePlantilla no existe"));
 
-        r.setVariable(var); // <-- nombre correcto
+        r.setVariable(var);
         r.setNombre(in.getNombre());
         r.setExpresion(in.getExpresion().trim());
         r.setSeveridad(in.getSeveridad());
@@ -87,7 +92,6 @@ public class ReglaServiceImpl implements ReglaService {
         return reglaRepo.findByHabilitadaTrue();
     }
 
-    // Ajusta con app.rules.fixedDelay en application.yml (default 60s)
     @Scheduled(fixedDelayString = "${app.rules.fixedDelay:60000}")
     @Override
     @Transactional
@@ -104,8 +108,7 @@ public class ReglaServiceImpl implements ReglaService {
 
                 OffsetDateTime since = OffsetDateTime.now().minusSeconds(ventanaSeg);
 
-                // todos los dispositivos de la misma plantilla
-                UUID plantillaId = r.getVariable().getPlantilla().getId(); // <-- usa 'variable'
+                UUID plantillaId = r.getVariable().getPlantilla().getId();
                 List<Dispositivo> dispositivos = dispositivoRepo.findByPlantilla_Id(plantillaId);
 
                 for (Dispositivo d : dispositivos) {
@@ -153,8 +156,8 @@ public class ReglaServiceImpl implements ReglaService {
                     " (usa: avg|min|max[_5m opcional] operadores >,<,>=,<=,=,== y un número)");
         }
         String metric = m.group(1).toLowerCase();
-        String num = m.group(2);      // puede ser null
-        String unit = m.group(3);     // s|m|h (puede ser null)
+        String num = m.group(2);
+        String unit = m.group(3);
         String op = m.group(4);
         double umbral = Double.parseDouble(m.group(5));
 
