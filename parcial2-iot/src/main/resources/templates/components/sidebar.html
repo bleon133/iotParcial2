@@ -79,6 +79,26 @@
                         <span class="link-label">Alertas</span>
                     </a>
                 </li>
+
+                <li>
+                    <a th:href="@{/estado}" th:classappend="${currentNav == 'estado'} ? ' active'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor"
+                                  d="M3 5h18v2H3V5zm3 6h4v8H6v-8zm6-4h4v12h-4V7zm6 6h4v6h-4v-6z"/>
+                        </svg>
+                        <span class="link-label">Estado</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a th:href="@{/comandos}" th:classappend="${currentNav == 'comandos'} ? ' active'">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor"
+                                  d="M3 5h18v2H3V5zm2 5h10v2H5v-2zm0 5h7v2H5v-2zm12-5h4v2h-4v-2zm0 5h4v2h-4v-2z"/>
+                        </svg>
+                        <span class="link-label">Comandos</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 

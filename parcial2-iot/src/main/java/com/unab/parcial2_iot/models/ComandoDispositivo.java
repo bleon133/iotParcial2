@@ -1,45 +1,53 @@
 package com.unab.parcial2_iot.models;
 
+
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
-import java.util.Map;
+import java.util.UUID;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "comando_dispositivo", schema = "iot",
-        indexes = @Index(name = "idx_cmd_dev_ts", columnList = "dispositivo_id, solicitado_en DESC"))
+@Table(name = "comando_dispositivo", schema = "iot")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ComandoDispositivo {
 
     @Id
     @GeneratedValue
-    @org.hibernate.annotations.UuidGenerator
-    private java.util.UUID id;
+    private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
 
-    /** Acción textual (ej. 'set_umbral','encender') */
     @Column(nullable = false)
     private String comando;
 
-    /** Payload JSONB opcional */
+    /**
+     * Columna 'datos' es jsonb en PostgreSQL.
+     * Usamos String: debe venir como JSON válido ({"umbral":50}, etc.).
+     */
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> datos;
+    @Column(columnDefinition = "jsonb")
+    private String datos;
 
-    /** Estado del comando (enum PostgreSQL) */
+    /**
+     * Columna 'estado' es enum PostgreSQL iot.estado_comando.
+     * Lo mapeamos como Enum Java + tipo específico PG.
+     */
     @Enumerated(EnumType.STRING)
-    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(name = "estado", nullable = false, columnDefinition = "iot.estado_comando")
-    private EstadoComando estado = EstadoComando.ENVIADO;
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private EstadoComando estado;
 
-    /** Auditoría */
     @Column(name = "solicitado_por")
     private String solicitadoPor;
 

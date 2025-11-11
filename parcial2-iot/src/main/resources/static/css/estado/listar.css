@@ -1,0 +1,96 @@
+/* === Estado de dispositivos: Listado === */
+
+body {
+    background: var(--gl-bg);
+    color: var(--gl-text);
+}
+
+/* Mantener alineado con el layout general */
+.app-content {
+    margin-left: var(--sb-w);
+    padding: 2rem;
+}
+
+/* Encabezado */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    color: var(--sb-accent);
+    margin-bottom: .25rem;
+}
+
+.page-subtitle {
+    font-size: 0.98rem;
+    color: var(--gl-muted);
+}
+
+/* Secciones / tarjetas */
+.card.shadow-soft {
+    border-radius: var(--radius);
+    border: 1px solid var(--gl-border);
+    background: var(--gl-card-bg);
+    backdrop-filter: blur(10px);
+}
+
+/* Títulos secundarios */
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sb-accent);
+}
+
+/* Tabla */
+.table {
+    background: transparent;
+    margin-bottom: 0;
+}
+
+.table thead.table-light {
+    background-color: rgba(248, 249, 250, 0.95);
+}
+
+.table tbody tr {
+    transition: background-color 0.18s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.06);
+}
+
+/* Columnas específicas */
+.estado-dispositivo {
+    font-weight: 600;
+}
+
+.estado-variable {
+    color: var(--gl-muted-strong, #6c757d);
+}
+
+.estado-valor span {
+    display: inline-block;
+}
+
+.estado-json {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    padding: .25rem .4rem;
+    margin-top: .15rem;
+    background: rgba(15, 23, 42, 0.04);
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.estado-fecha {
+    font-size: 0.85rem;
+    color: var(--gl-muted);
+}
+
+/* Estado vacío */
+.table-empty {
+    font-size: 0.95rem;
+}

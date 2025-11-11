@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+    <link rel="stylesheet" th:href="@{/css/plantillas/plantillas.css}">
+    <title>Comandos a dispositivos</title>
+</head>
+<body>
+<div th:replace="~{components/sidebar :: sidebar}"></div>
+
+<main class="app-content">
+    <div class="container-fluid py-4">
+
+        <header class="page-header">
+            <h1 class="page-title">Comandos a dispositivos</h1>
+            <p class="page-subtitle">
+                Envía comandos a los dispositivos y visualiza el historial de downlinks y su estado.
+            </p>
+        </header>
+
+        <div th:if="${ok}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${ok}">Operación exitosa</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Ha ocurrido un error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Enviar comando -->
+        <section class="card shadow-soft mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="section-title mb-0">Enviar nuevo comando</h2>
+                </div>
+
+                <form th:action="@{/comandos}" th:object="${nuevoComando}" method="post" class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Dispositivo *</label>
+                        <select class="form-select" th:field="*{dispositivoId}" required>
+                            <option value="" disabled
+                                    th:selected="*{dispositivoId} == null">Seleccione…</option>
+                            <option th:each="d : ${dispositivos}"
+                                    th:value="${d.id}"
+                                    th:text="${d.nombre}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Comando *</label>
+                        <input type="text" class="form-control"
+                               th:field="*{comando}"
+                               placeholder="encender / apagar / set_umbral" required>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Datos (JSON opcional)</label>
+                        <input type="text" class="form-control"
+                               th:field="*{datos}"
+                               placeholder='{"umbral": 50}'>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Solicitado por</label>
+                        <input type="text" class="form-control"
+                               th:field="*{solicitadoPor}"
+                               placeholder="usuario/app">
+                    </div>
+
+                    <div class="col-12 mt-2 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-send-fill me-1"></i> Enviar comando
+                        </button>
+                        <button class="btn btn-outline-secondary" type="reset">
+                            <i class="bi bi-eraser me-1"></i> Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Historial -->
+        <section class="card shadow-soft">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="section-title mb-0">Historial de comandos</h2>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Fecha solicitud</th>
+                            <th>Dispositivo</th>
+                            <th>Comando</th>
+                            <th>Datos</th>
+                            <th>Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(comandos)}">
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay comandos registrados.
+                            </td>
+                        </tr>
+                        <tr th:each="c : ${comandos}">
+                            <td th:text="${#temporals.format(c.solicitadoEn, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td th:text="${c.dispositivo.nombre}"></td>
+                            <td th:text="${c.comando}"></td>
+                            <td th:text="${c.datos != null ? c.datos : '-'}"></td>
+                            <td th:text="${c.estado}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+</body>
+</html>
