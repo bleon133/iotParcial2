@@ -22,4 +22,7 @@ public interface ReglaRepository extends JpaRepository<Regla, UUID> {
 
     @Query("SELECT r FROM Regla r JOIN FETCH r.variable WHERE r.habilitada = true")
     List<Regla> findByHabilitadaTrueConVariable();
+
+    @Query("select distinct r.severidad from Regla r where r.severidad is not null order by r.severidad")
+    List<String> findDistinctSeveridades();
 }

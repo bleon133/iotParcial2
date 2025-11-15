@@ -50,7 +50,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="r : ${reglas}">
+                            <tr th:each="r : ${reglas}"
+                                th:attr="data-id=${r.id},data-variable=${r.variable != null ? r.variable.id : null},data-nombre=${r.nombre},data-expresion=${r.expresion},data-severidad=${r.severidad},data-habilitada=${r.habilitada},data-ventana=${r.ventanaSegundos}">
                                 <td th:text="${r.nombre}"></td>
                                 <td th:text="${r.variable != null && r.variable.etiqueta != null
                                   ? r.variable.etiqueta
@@ -64,6 +65,12 @@
                                           th:classappend="${r.habilitada} ? 'text-success fw-semibold' : 'text-danger fw-semibold'"></span>
                                 </td>
                                 <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="editRegla(this)">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success me-1" onclick="dupRegla(this)">
+                                        <i class="bi bi-layers"></i> Duplicar
+                                    </button>
                                     <form th:action="@{|/reglas/${r.id}/toggle|}" method="post" class="d-inline-block">
                                         <button class="btn btn-sm btn-outline-secondary" type="submit">
                                             <i class="bi bi-toggle-on"></i> On/Off
@@ -90,7 +97,8 @@
                         <h5 class="mb-0">Nueva / Editar Regla</h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="/reglas">
+                        <form method="post" action="/reglas" id="reglaForm">
+                            <input type="hidden" name="id" id="reglaId" />
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Variable</label>
                                 <select class="form-select" name="variableId" required>
@@ -170,5 +178,65 @@
 <!-- jQuery y lógica del nav -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script th:src="@{/js/nav/nav.js}" defer></script>
+<script>
+  function editRegla(btn){
+    const tr = btn.closest('tr');
+    if(!tr) return;
+    const form = document.getElementById('reglaForm');
+    const id = tr.getAttribute('data-id');
+    const variable = tr.getAttribute('data-variable');
+    const nombre = tr.getAttribute('data-nombre');
+    const expresion = tr.getAttribute('data-expresion');
+    const severidad = tr.getAttribute('data-severidad');
+    const habilitada = tr.getAttribute('data-habilitada') === 'true';
+    const ventana = tr.getAttribute('data-ventana');
+    try {
+      form.action = '/reglas/' + id;
+      document.getElementById('reglaId').value = id;
+      const selVar = form.querySelector('select[name="variableId"]');
+      if(selVar) selVar.value = variable;
+      const inNombre = form.querySelector('input[name="nombre"]');
+      if(inNombre) inNombre.value = nombre;
+      const inExpr = form.querySelector('input[name="expresion"]');
+      if(inExpr) inExpr.value = expresion;
+      const inSev = form.querySelector('input[name="severidad"]');
+      if(inSev) inSev.value = severidad || 'info';
+      const inVent = form.querySelector('input[name="ventanaSegundos"]');
+      if(inVent) inVent.value = ventana || 300;
+      const chk = form.querySelector('input[name="habilitada"]');
+      if(chk) chk.checked = habilitada;
+      form.scrollIntoView({behavior:'smooth', block:'start'});
+    } catch(_){}
+  }
+
+  function dupRegla(btn){
+    const tr = btn.closest('tr');
+    if(!tr) return;
+    const form = document.getElementById('reglaForm');
+    const variable = tr.getAttribute('data-variable');
+    const nombre = tr.getAttribute('data-nombre');
+    const expresion = tr.getAttribute('data-expresion');
+    const severidad = tr.getAttribute('data-severidad');
+    const habilitada = tr.getAttribute('data-habilitada') === 'true';
+    const ventana = tr.getAttribute('data-ventana');
+    try {
+      form.action = '/reglas';
+      document.getElementById('reglaId').value = '';
+      const selVar = form.querySelector('select[name="variableId"]');
+      if(selVar) selVar.value = variable;
+      const inNombre = form.querySelector('input[name="nombre"]');
+      if(inNombre) inNombre.value = (nombre ? (nombre + ' (copia)') : '');
+      const inExpr = form.querySelector('input[name="expresion"]');
+      if(inExpr) inExpr.value = expresion;
+      const inSev = form.querySelector('input[name="severidad"]');
+      if(inSev) inSev.value = severidad || 'info';
+      const inVent = form.querySelector('input[name="ventanaSegundos"]');
+      if(inVent) inVent.value = ventana || 300;
+      const chk = form.querySelector('input[name="habilitada"]');
+      if(chk) chk.checked = habilitada;
+      form.scrollIntoView({behavior:'smooth', block:'start'});
+    } catch(_){}
+  }
+</script>
 </body>
 </html>

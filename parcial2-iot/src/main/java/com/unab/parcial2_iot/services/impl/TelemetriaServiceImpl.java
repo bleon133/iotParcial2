@@ -1,13 +1,18 @@
 package com.unab.parcial2_iot.services.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.unab.parcial2_iot.dto.EstadoDispositivoOut;
 import com.unab.parcial2_iot.dto.TelemetriaIn;
+import com.unab.parcial2_iot.dto.TelemetriaOutMin;
 import com.unab.parcial2_iot.models.Dispositivo;
 import com.unab.parcial2_iot.models.Telemetria;
 import com.unab.parcial2_iot.models.TipoDato;
 import com.unab.parcial2_iot.models.VariablePlantilla;
 import com.unab.parcial2_iot.repositories.DispositivoRepository;
+import com.unab.parcial2_iot.repositories.EstadoDispositivoRepository;
 import com.unab.parcial2_iot.repositories.TelemetriaRepository;
 import com.unab.parcial2_iot.repositories.VariablePlantillaRepository;
+import com.unab.parcial2_iot.services.SseHub;
 import com.unab.parcial2_iot.services.TelemetriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +32,9 @@ public class TelemetriaServiceImpl implements TelemetriaService {
     private final DispositivoRepository dispositivoRepo;
     private final VariablePlantillaRepository varRepo;
     private final TelemetriaRepository telemetriaRepo;
+    private final EstadoDispositivoRepository estadoRepo;
+    private final SseHub sseHub;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void registrarLectura(TelemetriaIn in) {
@@ -36,7 +44,16 @@ public class TelemetriaServiceImpl implements TelemetriaService {
         // 2) Variable (pertenencia a la misma plantilla)
         VariablePlantilla var = resolverVariable(disp, in);
 
-        // 3) Un único valor
+        // 3) Normalización: si se esperaba booleano y llega número 0/1, convertir
+        if (var.getTipoDato() == TipoDato.booleano && in.getBooleano() == null && in.getNumero() != null) {
+            double v = in.getNumero();
+            if (v == 0d || v == 1d) {
+                in.setBooleano(v == 1d);
+                in.setNumero(null);
+            }
+        }
+
+        // Debe venir solo un valor
         int count = nonNull(in.getNumero()) + nonNull(in.getBooleano()) + nonNull(in.getTexto()) + nonNull(in.getJson());
         if (count != 1) {
             throw new IllegalArgumentException("Debe enviar exactamente un valor: numero | booleano | texto | json");
@@ -68,6 +85,40 @@ public class TelemetriaServiceImpl implements TelemetriaService {
 
         // 6) Guardar (trigger actualiza estado_dispositivo)
         telemetriaRepo.save(t);
+
+        // 7) Notificar por SSE: estado y telemetría
+        estadoRepo.findOneWithJoins(disp.getId(), var.getId()).ifPresent(e -> {
+            EstadoDispositivoOut dto = EstadoDispositivoOut.builder()
+                    .dispositivoId(e.getDispositivo().getId())
+                    .dispositivoNombre(e.getDispositivo().getNombre())
+                    .variableId(e.getVariable().getId())
+                    .variableNombre(e.getVariable().getNombre())
+                    .variableEtiqueta(e.getVariable().getEtiqueta())
+                    .ultimoTs(e.getUltimoTs())
+                    .ultimoNumero(e.getUltimoNumero())
+                    .ultimoBooleano(e.getUltimoBooleano())
+                    .ultimoTexto(e.getUltimoTexto())
+                    .ultimoJson(e.getUltimoJson())
+                    .build();
+            sseHub.broadcastEstado(dto);
+        });
+
+        String jsonStr = null;
+        if (in.getJson() != null) {
+            try { jsonStr = objectMapper.writeValueAsString(in.getJson()); } catch (Exception ignored) {}
+        }
+        TelemetriaOutMin out = TelemetriaOutMin.builder()
+                .dispositivoId(disp.getId())
+                .dispositivoNombre(disp.getNombre())
+                .variableId(var.getId())
+                .variableNombre(var.getEtiqueta() != null ? var.getEtiqueta() : var.getNombre())
+                .ts(t.getTs())
+                .numero(in.getNumero())
+                .booleano(in.getBooleano())
+                .texto(in.getTexto())
+                .json(jsonStr)
+                .build();
+        sseHub.broadcastTelemetria(out);
     }
 
     private Dispositivo resolverDispositivo(TelemetriaIn in) {

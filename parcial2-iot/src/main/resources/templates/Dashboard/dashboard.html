@@ -31,6 +31,17 @@
                 style="font-size:clamp(1.5rem, 3.5vw, 2.25rem);"
                 th:text="${titulo} ?: 'Dashboard'">Dashboard</h1>
             <p class="lead text-secondary mb-0">Panel general para la supervisión y análisis de dispositivos IoT.</p>
+            <form class="mt-3" method="get" action="/dashboard">
+                <div class="d-inline-flex align-items-center gap-2">
+                    <label class="form-label m-0 small">Rango</label>
+                    <select class="form-select form-select-sm" name="range" id="rangeSelect">
+                        <option value="6h" th:selected="${range=='6h'}">6h</option>
+                        <option value="24h" th:selected="${range=='24h'}">24h</option>
+                        <option value="7d" th:selected="${range=='7d'}">7d</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Aplicar</button>
+                </div>
+            </form>
         </header>
 
         <!-- Métricas (KPIs) -->
@@ -87,6 +98,42 @@
                 </div>
             </div>
         </section>
+
+        <!-- Gráficas -->
+        <section class="row g-4 mt-1">
+            <div class="col-12 col-xl-6">
+                <div class="card shadow-sm glass-card h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="mb-0">Telemetrías por periodo</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartTelemetry" class="dash-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="card shadow-sm glass-card h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="mb-0">Alertas por periodo</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartAlerts" class="dash-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card shadow-sm glass-card h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h6 class="mb-0">Top dispositivos por periodo</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartTopDevices" class="dash-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </main>
 
@@ -102,12 +149,114 @@
 <!-- Nav + lógica de tema -->
 <script th:src="@{/js/nav/nav.js}" defer></script>
 
-<!-- Debug (puedes quitarlo luego) -->
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        console.log("Theme actual:", document.documentElement.getAttribute("data-theme"));
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Charts rendering -->
+<script th:inline="javascript">
+    const teleLabels = /*[[${telemetrySeries != null ? telemetrySeries.labels : null}]]*/ [];
+    const teleData   = /*[[${telemetrySeries != null ? telemetrySeries.data   : null}]]*/ [];
+    const alertLabels= /*[[${alertsSeries != null ? alertsSeries.labels : null}]]*/ [];
+    const alertData  = /*[[${alertsSeries != null ? alertsSeries.data   : null}]]*/ [];
+    const topLabels  = /*[[${topDevices != null ? topDevices.labels : null}]]*/ [];
+    const topData    = /*[[${topDevices != null ? topDevices.data   : null}]]*/ [];
+
+    function themeColors() {
+        const theme = document.documentElement.getAttribute('data-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const isDark = theme === 'dark';
+        return {
+            axis: isDark ? '#cbd5e1' : '#334155',
+            grid: isDark ? 'rgba(203,213,225,0.2)' : 'rgba(51,65,85,0.1)',
+            tele: '#0d6efd',
+            alerts: '#dc3545',
+            top: '#20c997'
+        };
+    }
+
+    function mkLine(ctx, labels, data, color) {
+        if (!ctx) return;
+        const t = themeColors();
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{label: '', data: data, borderColor: color, backgroundColor: color+'33', tension: 0.25, fill: true, pointRadius: 2}]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {legend: {display: false}},
+                scales: {
+                    x: {ticks: {color: t.axis}, grid: {color: t.grid}},
+                    y: {beginAtZero: true, ticks: {color: t.axis}, grid: {color: t.grid}}
+                }
+            }
+        });
+    }
+    function mkBar(ctx, labels, data, color) {
+        if (!ctx) return;
+        const t = themeColors();
+        new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{label: '', data: data, backgroundColor: color}] },
+            options: {
+                responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}},
+                scales: {
+                    x: {ticks: {color: t.axis}, grid: {color: t.grid}},
+                    y: {beginAtZero: true, ticks: {color: t.axis}, grid: {color: t.grid}}
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const t = themeColors();
+        mkLine(document.getElementById('chartTelemetry'), teleLabels, teleData, t.tele);
+        mkLine(document.getElementById('chartAlerts'), alertLabels, alertData, t.alerts);
+        mkBar(document.getElementById('chartTopDevices'), topLabels, topData, t.top);
+        // Rango: autoguardado y recarga automática
+        try {
+            const sel = document.getElementById('rangeSelect');
+            const params = new URLSearchParams(window.location.search);
+            const current = params.get('range') || '24h';
+            const saved = localStorage.getItem('dash.range');
+            const loader = document.getElementById('dashLoader');
+            const showLoader = () => { if (loader) loader.classList.remove('d-none'); };
+            if (sel) {
+                // Si no hay range en URL pero hay guardado, redirigir una vez
+                if (!params.get('range') && saved && saved !== current) {
+                    params.set('range', saved);
+                    showLoader();
+                    window.location.search = params.toString();
+                    return;
+                }
+                // Mantener select en valor actual
+                sel.value = current;
+                sel.addEventListener('change', () => {
+                    const val = sel.value;
+                    localStorage.setItem('dash.range', val);
+                    const p = new URLSearchParams(window.location.search);
+                    p.set('range', val);
+                    showLoader();
+                    window.location.search = p.toString();
+                });
+            }
+        } catch(_) {}
     });
 </script>
+<style>
+  .dash-chart { height: 420px; width: 100%; }
+  @media (min-width: 1400px) { .dash-chart { height: 480px; } }
+  @media (max-width: 576px) { .dash-chart { height: 360px; } }
+</style>
+<!-- Loader overlay -->
+<div id="dashLoader" class="dash-loader d-none"><div class="dash-spinner"></div></div>
+<style>
+  .dash-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); display:flex; align-items:center; justify-content:center; z-index: 1050; }
+  .dash-spinner { width: 3rem; height: 3rem; border: .35rem solid #ccc; border-top-color: #0d6efd; border-radius: 50%; animation: spin 1s linear infinite; }
+  .d-none { display: none !important; }
+  @keyframes spin { to { transform: rotate(360deg);} }
+  @media (prefers-color-scheme: dark) { .dash-loader { background: rgba(0,0,0,0.35); } }
+</style>
 <div class="sidebar-backdrop" onclick="closeSidebar()"></div>
 </body>
 </html>

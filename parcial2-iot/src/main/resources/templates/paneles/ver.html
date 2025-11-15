@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+  <title th:text="${panel.nombre}">Panel</title>
+</head>
+<body>
+<div th:replace="~{components/sidebar :: sidebar}"></div>
+<main class="app-content">
+  <div class="container-fluid py-4" th:attr="data-panel-id=${panel.id}">
+    <header class="mb-3">
+      <h1 class="fw-bold" th:text="${panel.nombre}">Panel</h1>
+      <p class="text-muted" th:text="${panel.descripcion}">DescripciÃ³n</p>
+    </header>
+
+    <!-- AÃ±adir widget -->
+    <section class="card mb-3">
+      <div class="card-body">
+        <form th:action="@{|/paneles/${panel.id}/widgets|}" method="post" class="row g-2 align-items-end">
+          <div class="col-12 col-md-3">
+            <label class="form-label">Dispositivo</label>
+            <select class="form-select" name="dispositivoId" id="dispSel" required>
+              <option th:each="d : ${dispositivos}" th:value="${d.id}" th:text="${d.nombre}"></option>
+            </select>
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label">Variable</label>
+            <div class="dropdown w-100" id="varDropdown">
+              <input type="hidden" name="variableId" id="variableIdHidden" />
+              <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="varSelectBtn">
+                <span id="varSelectLabel">Seleccioneâ€¦</span>
+                <i class="bi bi-caret-down-fill"></i>
+              </button>
+              <div class="dropdown-menu p-2 w-100" style="max-height:280px;overflow:auto;">
+                <input type="text" class="form-control form-control-sm mb-2" placeholder="Buscar variable..." id="varSearchIn" />
+                <div id="varOptions"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" name="chartType"><option value="line">line</option><option value="area">area</option><option value="bar">bar</option><option value="stackedbar">stackedbar</option><option value="doughnut">doughnut</option></select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label">Rango</label>
+            <select class="form-select" name="rango"><option>6h</option><option selected>24h</option><option>7d</option></select>
+          </div>
+          <div class="col-6 col-md-1">
+            <label class="form-label">Color</label>
+            <input class="form-control" type="color" name="color" value="#0d6efd"/>
+          </div>
+          <div class="col-12 col-md-1">
+            <button class="btn btn-primary w-100">Agregar</button>
+          </div>
+        </form>
+        <small class="text-muted">Nota: por ahora el grÃ¡fico espera variables numÃ©ricas.</small>
+      </div>
+    </section>
+
+    <!-- Grid de widgets -->
+    <section class="row g-3">
+      <div class="col-12 col-lg-6 widget-col" th:each="w : ${widgets}">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="widget-title" th:attr="data-wid=${w.id}" th:text="${w.titulo != null ? w.titulo : (w.variable != null ? w.variable.nombre : 'Widget')}">Widget</strong>
+              <small class="text-muted ms-2" th:text="${w.rango}"></small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="widget-handle" title="Arrastrar" style="cursor: move; user-select: none;">
+                <i class="bi bi-grip-vertical"></i>
+              </span>
+              <form th:action="@{|/paneles/${panel.id}/widgets/${w.id}/eliminar|}" method="post" class="m-0">
+                <button class="btn btn-sm btn-outline-danger" type="submit" title="Eliminar">&times;</button>
+              </form>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-box">
+              <canvas class="panel-chart" th:attr="id=${'w_' + w.id}" th:attrappend="data-did=${w.dispositivo.id}, data-vid=${w.variable.id}, data-chart=${w.chartType}, data-rango=${w.rango}, data-color=${w.color}"></canvas>
+            </div>
+            <!-- UI de agregar serie removida por preferencia del usuario -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const dispSel = document.getElementById('dispSel');
+    const varOptions = document.getElementById('varOptions');
+    const varSearchIn = document.getElementById('varSearchIn');
+    const varLabel = document.getElementById('varSelectLabel');
+    const varHidden = document.getElementById('variableIdHidden');
+    async function loadVars(did){
+      if (!did) return;
+      try {
+        varOptions.innerHTML = '<div class="text-muted px-2">Cargandoâ€¦</div>';
+        const res = await fetch(`/api/dispositivos/${did}/variables`);
+        const data = await res.json();
+        varOptions.innerHTML = '';
+        data.forEach(v=>{
+          const a = document.createElement('a');
+          a.href = '#'; a.className='dropdown-item';
+          a.dataset.id = v.id;
+          a.textContent = v.etiqueta ? v.etiqueta : v.nombre;
+          a.addEventListener('click', (e)=>{ e.preventDefault(); varHidden.value = v.id; varLabel.textContent = a.textContent; });
+          varOptions.appendChild(a);
+        });
+        if (varSearchIn) { varSearchIn.value=''; }
+      } catch(_) { varOptions.innerHTML = '<div class="text-muted px-2">(sin variables)</div>'; }
+    }
+    if (dispSel) { loadVars(dispSel.value); dispSel.addEventListener('change', e=>loadVars(e.target.value)); }
+    if (varSearchIn) {
+      varSearchIn.addEventListener('input', ()=>{
+        const q = varSearchIn.value.toLowerCase();
+        Array.from(varOptions.children).forEach(item=>{
+          const txt = (item.textContent||'').toLowerCase();
+          item.classList.toggle('d-none', q && !txt.includes(q));
+        });
+      });
+    }
+
+    // Inicializar formularios "Agregar serie" por widget
+    document.querySelectorAll('form[action*="/series"]').forEach(async form => {
+      try {
+        const wid = form.getAttribute('data-wid');
+        const did = form.getAttribute('data-did');
+        const optBox = document.getElementById('serVarOptions_' + wid);
+        const searchBox = document.getElementById('serVarSearch_' + wid);
+        const labelEl = document.getElementById('serVarLabel_' + wid);
+        const hiddenEl = document.getElementById('serVarHidden_' + wid);
+        // Cargar variables del dispositivo del widget
+        const vars = await (await fetch(`/api/dispositivos/${did}/variables`)).json();
+        optBox.innerHTML = '';
+        vars.forEach(v => {
+          const a = document.createElement('a');
+          a.href = '#'; a.className = 'dropdown-item';
+          a.dataset.id = v.id; a.textContent = v.etiqueta ? v.etiqueta : v.nombre;
+          a.addEventListener('click', (e)=>{ e.preventDefault(); hiddenEl.value = v.id; labelEl.textContent = a.textContent; });
+          optBox.appendChild(a);
+        });
+        if (searchBox) {
+          searchBox.addEventListener('input', ()=>{
+            const q = (searchBox.value||'').toLowerCase();
+            Array.from(optBox.children).forEach(item => {
+              const txt = (item.textContent||'').toLowerCase();
+              item.classList.toggle('d-none', q && !txt.includes(q));
+            });
+          });
+        }
+        // Validar variableId presente al enviar
+        form.addEventListener('submit', (e)=>{
+          if (!hiddenEl.value) { e.preventDefault(); alert('Seleccione una variable para la serie.'); }
+        });
+      } catch(_) { /* ignore */ }
+    });
+    // limpieza: selector antiguo removido
+    document.querySelectorAll('canvas[id^="w_"]').forEach(canvas => {
+      const did = canvas.dataset.did; const vid = canvas.dataset.vid;
+      const rango = canvas.dataset.rango || '24h';
+      const chartType = canvas.dataset.chart || 'line';
+      const color = canvas.dataset.color || '#0d6efd';
+      const url = `/api/telemetria/series?dispositivoId=${did}&variableId=${vid}&range=${rango}`;
+      fetch(url).then(r => r.json()).then(async s => {
+        let meta = {};
+        try { meta = await (await fetch(`/api/variables/${vid}/meta`)).json(); } catch(_){ }
+        const unit = meta && meta.unidad ? ` ${meta.unidad}` : '';
+        const precision = meta && meta.precision != null ? parseInt(meta.precision) : null;
+        const vmin = meta && meta.minimo != null ? parseFloat(meta.minimo) : null;
+        const vmax = meta && meta.maximo != null ? parseFloat(meta.maximo) : null;
+        const all01 = Array.isArray(s.data) && s.data.length>0 && s.data.every(v => v===0 || v===1);
+        const theme = document.documentElement.getAttribute('data-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const axisColor = theme==='dark' ? '#cbd5e1' : '#334155';
+        const gridColor = theme==='dark' ? 'rgba(203,213,225,0.2)' : 'rgba(51,65,85,0.08)';
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0,0,0,canvas.clientHeight||300);
+        gradient.addColorStop(0, color+'88');
+        gradient.addColorStop(1, color+'11');
+        const fmt = v => {
+          if (v == null || isNaN(v)) return '';
+          if (precision != null) return Number(v).toFixed(precision) + unit;
+          return Number(v).toString() + unit;
+        };
+        const horizLines = {
+          id: 'horizLines',
+          afterDraw(chart){
+            if (vmin==null && vmax==null) return;
+            const y = chart.scales.y; const ctx2 = chart.ctx; const area=chart.chartArea;
+            ctx2.save(); ctx2.setLineDash([4,4]); ctx2.strokeStyle = '#88888855'; ctx2.fillStyle = '#888'; ctx2.font='10px system-ui';
+            if (vmin!=null){ const yv=y.getPixelForValue(vmin); ctx2.beginPath(); ctx2.moveTo(area.left,yv); ctx2.lineTo(area.right,yv); ctx2.stroke(); ctx2.fillText('min '+vmin+unit, area.right-48, yv-4); }
+            if (vmax!=null){ const yv=y.getPixelForValue(vmax); ctx2.beginPath(); ctx2.moveTo(area.left,yv); ctx2.lineTo(area.right,yv); ctx2.stroke(); ctx2.fillText('max '+vmax+unit, area.right-48, yv-4); }
+            ctx2.restore();
+          }
+        };
+        if (chartType === 'doughnut') {
+          const last = s.data && s.data.length? s.data[s.data.length-1] : 0;
+          const min = (vmin!=null)?vmin:0, max = (vmax!=null)?vmax:100;
+          const val = Math.max(min, Math.min(max, last));
+          const used = val - min; const rest = Math.max(0, (max - min) - used);
+          new Chart(canvas, { type:'doughnut', data:{ labels:['Valor','Resto'], datasets:[{ data:[used, rest], backgroundColor:[color, gridColor] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:()=> fmt(val)}}}, cutout:'70%'} });
+        } else {
+          const fillArea = chartType === 'area';
+          const isStacked = chartType === 'stackedbar';
+          const datasets = [{ label: meta && meta.etiqueta ? meta.etiqueta : '', data:s.data, borderColor: color, backgroundColor: fillArea? gradient : (isStacked? color : color+'33'), fill: fillArea, tension: all01?0:0.25, stepped: all01 }];
+          try {
+            const panelId = document.querySelector('.container-fluid').dataset.panelId;
+            const wid = canvas.id.replace('w_','');
+            const extras = await (await fetch(`/paneles/${panelId}/widgets/${wid}/series`)).json();
+            const palette = ['#0d6efd','#20c997','#dc3545','#ffc107','#6f42c1','#198754','#fd7e14'];
+            for (let i=0;i<extras.length;i++){
+              const e = extras[i];
+              let sE = {labels:[], data:[]};
+              try { sE = await (await fetch(`/api/telemetria/series?dispositivoId=${did}&variableId=${e.variableId}&range=${rango}`)).json(); } catch(_){ }
+              const c = (e.color && e.color.trim()) ? e.color : palette[i % palette.length];
+              const steppedE = Array.isArray(sE.data) && sE.data.length>0 && sE.data.every(v=>v===0||v===1);
+              datasets.push({ label: e.label || '', data: sE.data, borderColor: c, backgroundColor: fillArea? c+'33' : (isStacked? c : c+'22'), fill: fillArea, tension: steppedE?0:0.25, stepped: steppedE });
+              if (sE.labels && sE.labels.length > s.labels.length) { s.labels = sE.labels; }
+            }
+          } catch(_){ }
+          new Chart(canvas, {
+            type: fillArea ? 'line' : (isStacked?'bar':chartType),
+            data: { labels: s.labels, datasets },
+            options: { responsive:true, maintainAspectRatio:false,
+              plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=> fmt(ctx.parsed.y) } } },
+              scales:{ x:{ ticks:{ color:axisColor }, grid:{ color:gridColor }, stacked:isStacked }, y:{ beginAtZero:true, stacked:isStacked, ticks:{ color:axisColor, callback:(v)=> (all01? v : (precision!=null? Number(v).toFixed(precision): v)) }, grid:{ color:gridColor } } }
+            },
+            plugins:[horizLines]
+          });
+        }
+      }).catch(()=>{});
+    });
+
+    // Drag & Drop reordenar widgets con handle (solo permite arrastrar si viene del handle)
+    function idFromCanvas(c){ return c.id.replace('w_',''); }
+    function idFromCanvas(c){ return c.id.replace('w_',''); }
+    let dragSrc = null;
+    // permitir arrastre solo si el usuario presionó el handle recientemente
+    window.__dragHandlePressed = false;
+    document.querySelectorAll('.widget-handle').forEach(h => { h.addEventListener('mousedown', ()=>{ window.__dragHandlePressed = true; setTimeout(()=> window.__dragHandlePressed=false, 500); }, {passive:true}); });
+    let dragSrc = null;
+    document.querySelectorAll('.widget-col').forEach(col => {
+      col.setAttribute('draggable','true');
+      col.addEventListener('dragstart', (e)=>{
+        // permitir drag solo si se presionó el handle recientemente
+        if (!window.__dragHandlePressed) { e.preventDefault(); return; }
+        dragSrc = col;
+        e.dataTransfer.effectAllowed='move';
+      });
+      col.addEventListener('dragover', (e)=>{
+        if (dragSrc) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+      });
+      col.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        if (!dragSrc || dragSrc===col) return;
+        const row = col.parentElement;
+        if (Array.from(row.children).indexOf(dragSrc) < Array.from(row.children).indexOf(col))
+          row.insertBefore(dragSrc, col.nextSibling);
+        else row.insertBefore(dragSrc, col);
+        dragSrc = null;
+        sendOrder();
+      });
+      col.addEventListener('dragend', ()=>{ dragSrc=null; });
+    });
+    function sendOrder(){
+      try{
+        const order = Array.from(document.querySelectorAll('canvas[id^="w_"]')).map(c=>idFromCanvas(c)).join(',');
+        fetch(window.location.pathname + '/widgets/orden', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'order='+encodeURIComponent(order)});
+      }catch(_){ }
+    }
+
+    // EdiciÃ³n inline de tÃ­tulo
+    document.querySelectorAll('.widget-title').forEach(el=>{
+      el.style.cursor = 'text';
+      el.title = 'Click para editar tÃ­tulo';
+      el.addEventListener('click', ()=>{
+        const wid = el.dataset.wid; if (!wid) return;
+        const input = document.createElement('input');
+        input.type='text'; input.className='form-control form-control-sm d-inline-block';
+        input.value = el.textContent.trim(); input.style.maxWidth='60%';
+        const parent = el.parentElement; el.classList.add('d-none'); parent.insertBefore(input, el);
+        input.focus(); input.select();
+        const save = ()=>{
+          const val = input.value.trim();
+          fetch(window.location.pathname + `/widgets/${wid}/titulo`, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'titulo='+encodeURIComponent(val)})
+            .finally(()=>{ el.textContent = val || el.textContent; input.remove(); el.classList.remove('d-none'); });
+        };
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', (e)=>{ if (e.key==='Enter') { e.preventDefault(); save(); }});
+      });
+    });
+  });
+</script>
+<style>
+  .chart-box { height: 420px; max-height: 540px; overflow: hidden; }
+  .panel-chart { height: 100%; width: 100%; display: block; }
+  @media (min-width: 1400px) { .chart-box { height: 480px; } }
+  @media (max-width: 576px) { .chart-box { height: 360px; } }
+  .widget-handle { padding: 2px 6px; border-radius: 4px; cursor: move; }
+  .widget-handle:hover { background: rgba(0,0,0,0.05); }
+  @media (prefers-color-scheme: dark) { .widget-handle:hover { background: rgba(255,255,255,0.08); } }
+</style>
+</body>
+</html>
+

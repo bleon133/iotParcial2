@@ -25,4 +25,6 @@ public class EstadoDispositivoOut {
     private Boolean ultimoBooleano;
     private String ultimoTexto;
     private String ultimoJson;
+
+    private Boolean tieneRegla;
 }

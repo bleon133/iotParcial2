@@ -11,5 +11,5 @@ import java.util.Map;
 
 public interface AlertaService {
     Alerta crear(Dispositivo d, Regla r, Map<String, Object> detalles);
-    Page<AlertaOut> listar(String filtroTipo, java.util.UUID id, Pageable pageable);
+    Page<AlertaOut> listar(String filtroTipo, java.util.UUID id, String severidad, Pageable pageable);
 }

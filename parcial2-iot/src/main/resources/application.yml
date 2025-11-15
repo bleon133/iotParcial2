@@ -6,4 +6,6 @@ app:
     inboundTopics:
       - devices/+/telemetry
       - devices/+/telemetry/+
+    ackTopics:
+      - devices/+/commands/ack
     qos: 1

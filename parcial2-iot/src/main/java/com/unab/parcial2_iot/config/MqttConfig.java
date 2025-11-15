@@ -57,4 +57,25 @@ public class MqttConfig {
                 .handle(handler)
                 .get();
     }
+
+    @Bean
+    public IntegrationFlow mqttAckInboundFlow(MqttPahoClientFactory cf, com.unab.parcial2_iot.config.handlers.ComandoMqttAckHandler handler) {
+        String clientId = "api-ack-" + UUID.randomUUID();
+        String[] topics;
+        if (props.getAckTopics() != null && !props.getAckTopics().isEmpty()) {
+            topics = props.getAckTopics().toArray(String[]::new);
+        } else {
+            topics = new String[]{"devices/+/commands/ack"};
+        }
+
+        var adapter = new MqttPahoMessageDrivenChannelAdapter(clientId, cf, topics);
+        var converter = new DefaultPahoMessageConverter(props.getQos(), false);
+        adapter.setConverter(converter);
+        adapter.setQos(props.getQos());
+        adapter.setAutoStartup(true);
+
+        return IntegrationFlow.from(adapter)
+                .handle(handler)
+                .get();
+    }
 }

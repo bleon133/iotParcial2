@@ -26,6 +26,7 @@
                 Consulta lecturas recientes por dispositivo y variable.
             </p>
         </header>
+        <div class="small text-muted">En vivo: <span id="sseTeleInd">desconectado</span></div>
 
         <!-- Filtros -->
         <section class="card shadow-soft mb-4">
@@ -72,6 +73,12 @@
                         <!-- Botón -->
                         <div class="col-12 col-md-1 d-grid">
                             <button class="btn btn-primary" type="submit">Ver</button>
+                        </div>
+                        <div class="col-12 col-md-2 d-grid" th:if="${dispositivoId != null and variableId != null}">
+                            <a class="btn btn-outline-secondary"
+                               th:href="@{|/telemetria/export?dispositivoId=${dispositivoId}&variableId=${variableId}|}">
+                                <i class="bi bi-download me-1"></i> Exportar CSV
+                            </a>
                         </div>
 
                     </div>
@@ -138,5 +145,54 @@
 
 <!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+<!-- SSE Telemetría: añade nuevas lecturas en vivo -->
+<script th:inline="javascript">
+  (function(){
+    const dispositivoId = /*[[${dispositivoId}]]*/ null;
+    const variableId = /*[[${variableId}]]*/ null;
+    const limit = /*[[${limit}]]*/ 50;
+    if (!dispositivoId || !variableId) return;
+    try {
+      const url = `/sse/telemetria?dispositivoId=${dispositivoId}&variableId=${variableId}`;
+      const es = new EventSource(url);
+      const indEl = document.getElementById('sseTeleInd');
+      const setIndicator = (ok) => { if (indEl) indEl.textContent = ok ? 'conectado' : 'desconectado'; };
+      es.addEventListener('open', ()=>setIndicator(true));
+      es.addEventListener('error', ()=>setIndicator(false));
+      es.addEventListener('update', (ev) => {
+        try {
+          const d = JSON.parse(ev.data);
+          const tbody = document.querySelector('table tbody');
+          if (!tbody) return;
+          const tr = document.createElement('tr');
+          const tdTs = document.createElement('td');
+          const tdVal = document.createElement('td');
+          tdTs.className = 'text-nowrap';
+          const ts = new Date(d.ts);
+          if (!isNaN(ts)) {
+            const pad = n => (n<10?('0'+n):n);
+            tdTs.textContent = ts.getFullYear()+"-"+pad(ts.getMonth()+1)+"-"+pad(ts.getDate())+" "+pad(ts.getHours())+":"+pad(ts.getMinutes())+":"+pad(ts.getSeconds());
+          } else { tdTs.textContent = d.ts; }
+          if (d.numero != null) tdVal.textContent = d.numero;
+          else if (d.booleano != null) tdVal.textContent = d.booleano;
+          else if (d.texto != null) tdVal.textContent = d.texto;
+          else if (d.json != null) { const pre=document.createElement('pre'); pre.className='json-pre'; pre.textContent=d.json; tdVal.appendChild(pre); }
+          tr.appendChild(tdTs); tr.appendChild(tdVal);
+          // Prepend
+          if (tbody.firstChild) tbody.insertBefore(tr, tbody.firstChild); else tbody.appendChild(tr);
+          // Trim
+          while (tbody.children.length > limit) tbody.removeChild(tbody.lastChild);
+          tr.classList.add('flash-update');
+          setTimeout(()=>tr.classList.remove('flash-update'), 800);
+        } catch(_e) { /* noop */ }
+      });
+    } catch(_e) { /* SSE no disponible */ }
+  })();
+</script>
+<style>
+  .flash-update { animation: flashBg 0.8s ease; }
+  @keyframes flashBg { from { background: rgba(200,220,255,.8);} to { background: transparent; } }
+</style>
 </body>
 </html>

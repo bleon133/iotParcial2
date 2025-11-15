@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+    <title>Paneles</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  </head>
+  <body>
+  <div th:replace="~{components/sidebar :: sidebar}"></div>
+  <main class="app-content">
+    <div class="container-fluid py-4">
+      <header class="mb-3">
+        <h1 class="fw-bold">Paneles</h1>
+        <p class="text-muted">Crea y organiza paneles de gráficos para tus dispositivos.</p>
+      </header>
+      <section class="row g-3">
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">Nuevo panel</div>
+            <div class="card-body">
+              <form method="post" th:action="@{/paneles}" th:object="${nuevo}">
+                <div class="mb-2">
+                  <label class="form-label">Nombre</label>
+                  <input class="form-control" th:field="*{nombre}" placeholder="Panel de monitoreo"/>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Descripción</label>
+                  <textarea class="form-control" th:field="*{descripcion}" rows="2"></textarea>
+                </div>
+                <button class="btn btn-primary">Crear</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">Mis paneles</div>
+            <div class="card-body">
+              <div class="list-group">
+                <a th:each="p : ${paneles}" th:href="@{|/paneles/${p.id}|}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                  <span>
+                    <strong th:text="${p.nombre}">Panel</strong>
+                    <small class="text-muted ms-2" th:text="${p.descripcion}"></small>
+                  </span>
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+                <div th:if="${#lists.isEmpty(paneles)}" class="text-muted">Aún no hay paneles.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+  </body>
+  </html>
+

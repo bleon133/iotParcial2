@@ -27,6 +27,7 @@
                 Último valor conocido por dispositivo y variable, actualizado a partir de la telemetría recibida.
             </p>
         </header>
+        <div class="mb-2 small text-muted">En vivo: <span id="sseEstadoInd">desconectado</span></div>
 
         <!-- Alertas opcionales -->
         <div th:if="${ok}" class="alert alert-success alert-dismissible fade show mt-2" role="alert">
@@ -82,8 +83,8 @@
                     <h2 class="section-title mb-0">Últimos estados registrados</h2>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+           <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                         <tr>
                             <th>Dispositivo</th>
@@ -94,13 +95,14 @@
                         </thead>
                         <tbody>
                         <!-- Cuando hay datos -->
-                        <tr th:each="e : ${estados}">
+                        <tr th:each="e : ${estados}"
+                            th:attr="data-did=${e.dispositivoId},data-vid=${e.variableId}">
                             <td class="estado-dispositivo"
                                 th:text="${e.dispositivoNombre}">Dispositivo</td>
 
-                            <td class="estado-variable"
-                                th:text="${e.variableEtiqueta != null ? e.variableEtiqueta : e.variableNombre}">
-                                Variable
+                            <td class="estado-variable">
+                                <span th:text="${e.variableEtiqueta != null ? e.variableEtiqueta : e.variableNombre}">Variable</span>
+                                <span th:if="${e.tieneRegla}" class="badge text-bg-warning ms-2">Regla</span>
                             </td>
 
                             <td class="estado-valor">
@@ -134,9 +136,54 @@
         </section>
 
     </div>
-</main>
+ </main>
 
-<!-- Scripts base -->
-<th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+ <!-- Scripts base -->
+ <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+ <!-- SSE Estado: actualiza filas en vivo -->
+ <script th:inline="javascript">
+   (function(){
+     const selectedId = /*[[${seleccionadoId}]]*/ null;
+     const url = selectedId ? ("/sse/estado?dispositivoId=" + selectedId) : "/sse/estado";
+     try {
+          const es = new EventSource(url);
+          const indEl = document.getElementById('sseEstadoInd');
+          const setIndicator = (ok) => { if (indEl) indEl.textContent = ok ? 'conectado' : 'desconectado'; };
+          es.addEventListener('open', ()=>setIndicator(true));
+          es.addEventListener('error', ()=>setIndicator(false));
+       es.addEventListener('update', (ev) => {
+         try {
+           const d = JSON.parse(ev.data);
+           let sel = `tr[data-vid='${d.variableId}']`;
+           if (!selectedId && d.dispositivoId) sel += `[data-did='${d.dispositivoId}']`;
+           const row = document.querySelector(sel);
+           if (!row) return;
+           const valCell = row.querySelector('.estado-valor');
+           const dateCell = row.querySelector('.estado-fecha');
+           if (!valCell || !dateCell) return;
+           valCell.innerHTML = '';
+           if (d.ultimoNumero != null) { valCell.textContent = d.ultimoNumero; }
+           else if (d.ultimoBooleano != null) { valCell.textContent = d.ultimoBooleano; }
+           else if (d.ultimoTexto != null) { valCell.textContent = d.ultimoTexto; }
+           else if (d.ultimoJson != null) { const pre=document.createElement('pre'); pre.className='estado-json mb-0'; pre.textContent=d.ultimoJson; valCell.appendChild(pre); }
+           const ts = new Date(d.ultimoTs);
+           if (!isNaN(ts)) {
+             const pad = n => (n<10?('0'+n):n);
+             const fmt = ts.getFullYear()+"-"+pad(ts.getMonth()+1)+"-"+pad(ts.getDate())+" "+pad(ts.getHours())+":"+pad(ts.getMinutes())+":"+pad(ts.getSeconds());
+             dateCell.textContent = fmt;
+           }
+           // resaltar actualización
+           row.classList.add('flash-update');
+           setTimeout(()=>row.classList.remove('flash-update'), 800);
+         } catch(_e) { /* noop */ }
+       });
+     } catch(_e) { /* SSE no disponible */ }
+   })();
+ </script>
+ <style>
+   .flash-update { animation: flashBg 0.8s ease; }
+   @keyframes flashBg { from { background: rgba(200,240,200,.8);} to { background: transparent; } }
+ </style>
 </body>
 </html>

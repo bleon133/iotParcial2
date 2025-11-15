@@ -25,6 +25,7 @@ public class ReglaController {
         model.addAttribute("reglas", reglaService.listarTodas());
         model.addAttribute("variables", varRepo.findAll());
         model.addAttribute("form", new ReglaIn());
+        model.addAttribute("nav", "reglas");
         return "reglas/listar";
     }
 

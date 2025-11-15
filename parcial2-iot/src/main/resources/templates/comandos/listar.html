@@ -86,6 +86,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                     <h2 class="section-title mb-0">Historial de comandos</h2>
+                    <div class="small text-muted">En vivo: <span id="sseCmdInd">desconectado</span></div>
                 </div>
 
                 <div class="table-responsive">
@@ -105,12 +106,13 @@
                                 No hay comandos registrados.
                             </td>
                         </tr>
-                        <tr th:each="c : ${comandos}">
-                            <td th:text="${#temporals.format(c.solicitadoEn, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                            <td th:text="${c.dispositivo.nombre}"></td>
-                            <td th:text="${c.comando}"></td>
-                            <td th:text="${c.datos != null ? c.datos : '-'}"></td>
-                            <td th:text="${c.estado}"></td>
+                        <tr th:each="c : ${comandos}"
+                            th:attr="data-cid=${c.id},data-did=${c.dispositivo.id}">
+                            <td class="cmd-solicitado" th:text="${#temporals.format(c.solicitadoEn, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td class="cmd-dispositivo" th:text="${c.dispositivo.nombre}"></td>
+                            <td class="cmd-comando" th:text="${c.comando}"></td>
+                            <td class="cmd-datos" th:text="${c.datos != null ? c.datos : '-'}"></td>
+                            <td class="cmd-estado" th:text="${c.estado}"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -122,5 +124,71 @@
 </main>
 
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+
+<!-- SSE Comandos: actualiza estados en vivo -->
+<script th:inline="javascript">
+  (function(){
+    const selectedId = /*[[${seleccionadoId}]]*/ null;
+    const url = selectedId ? ("/sse/comandos?dispositivoId=" + selectedId) : "/sse/comandos";
+    try {
+      const es = new EventSource(url);
+      const ind = document.getElementById('sseCmdInd');
+      const setIndicator = (ok) => { if (ind) ind.textContent = ok ? 'conectado' : 'desconectado'; };
+      es.addEventListener('open', ()=>setIndicator(true));
+      es.addEventListener('error', ()=>setIndicator(false));
+      es.addEventListener('update', (ev) => {
+        try {
+          const d = JSON.parse(ev.data);
+          if (selectedId && d.dispositivoId && d.dispositivoId !== selectedId) return;
+          let row = document.querySelector(`tr[data-cid='${d.id}']`);
+          if (!row) {
+            // Si incluye datos de creación, insertar nueva fila
+            if (!d.comando) return;
+            const tbody = document.querySelector('table tbody');
+            if (!tbody) return;
+            row = document.createElement('tr');
+            row.setAttribute('data-cid', d.id);
+            if (d.dispositivoId) row.setAttribute('data-did', d.dispositivoId);
+            const tdFecha = document.createElement('td');
+            const tdDisp = document.createElement('td');
+            const tdCmd  = document.createElement('td');
+            const tdDat  = document.createElement('td');
+            const tdEst  = document.createElement('td');
+            tdFecha.className = 'cmd-solicitado';
+            tdDisp.className = 'cmd-dispositivo';
+            tdCmd.className  = 'cmd-comando';
+            tdDat.className  = 'cmd-datos';
+            tdEst.className  = 'cmd-estado';
+            // Fecha
+            if (d.solicitadoEn) {
+              const ts = new Date(d.solicitadoEn);
+              const pad = n => (n<10?('0'+n):n);
+              tdFecha.textContent = isNaN(ts) ? d.solicitadoEn : (ts.getFullYear()+"-"+pad(ts.getMonth()+1)+"-"+pad(ts.getDate())+" "+pad(ts.getHours())+":"+pad(ts.getMinutes())+":"+pad(ts.getSeconds()));
+            } else tdFecha.textContent = '-';
+            tdDisp.textContent = d.dispositivoNombre || '-';
+            tdCmd.textContent  = d.comando || '-';
+            tdDat.textContent  = d.datos || '-';
+            tdEst.textContent  = d.estado || '-';
+            row.append(tdFecha, tdDisp, tdCmd, tdDat, tdEst);
+            const tbodyFirst = tbody.querySelector('tr');
+            if (tbodyFirst) tbody.insertBefore(row, tbodyFirst); else tbody.appendChild(row);
+          } else {
+            const estadoCell = row.querySelector('.cmd-estado');
+            if (estadoCell) {
+              estadoCell.textContent = d.estado;
+              estadoCell.classList.add('flash-update');
+              setTimeout(()=>estadoCell.classList.remove('flash-update'), 800);
+            }
+          }
+        } catch(_e) { /* noop */ }
+      });
+    } catch(_e) { /* SSE no disponible */ }
+  })();
+</script>
+
+<style>
+  .flash-update { animation: flashBg 0.8s ease; }
+  @keyframes flashBg { from { background: rgba(255,230,150,.8);} to { background: transparent; } }
+</style>
 </body>
 </html>

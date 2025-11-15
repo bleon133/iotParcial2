@@ -38,6 +38,7 @@ public class DispositivoController {
         model.addAttribute("tipos", TipoDispositivo.values());
         model.addAttribute("protocolos", Protocolo.values());
         model.addAttribute("dispositivos", dispositivoService.listar());
+        model.addAttribute("nav", "dispositivos");
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
         return "dispositivos/crear"; // templates/dispositivos/crear.html

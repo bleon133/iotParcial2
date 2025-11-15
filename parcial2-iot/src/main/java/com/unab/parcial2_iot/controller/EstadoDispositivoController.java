@@ -18,8 +18,12 @@ public class EstadoDispositivoController {
     private final DispositivoRepository dispositivoRepo;
 
     @GetMapping
-    public String listar(@RequestParam(name = "dispositivoId", required = false) UUID dispositivoId,
+    public String listar(@RequestParam(name = "dispositivoId", required = false) String dispositivoIdStr,
                          Model model) {
+        UUID dispositivoId = null;
+        if (dispositivoIdStr != null && !dispositivoIdStr.isBlank() && !"null".equalsIgnoreCase(dispositivoIdStr)) {
+            try { dispositivoId = UUID.fromString(dispositivoIdStr.trim()); } catch (Exception ignored) {}
+        }
 
         model.addAttribute("dispositivos", dispositivoRepo.findAll());
         model.addAttribute("seleccionadoId", dispositivoId);

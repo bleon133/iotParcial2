@@ -24,6 +24,7 @@ public class ComandoDispositivoController {
                          Model model) {
 
         model.addAttribute("titulo", "Comandos a dispositivos");
+        model.addAttribute("nav", "comandos");
         model.addAttribute("dispositivos", dispositivoRepo.findAll());
         model.addAttribute("nuevoComando", new NuevoComandoForm());
         model.addAttribute("comandos", comandoService.historialPorDispositivo(dispositivoId));

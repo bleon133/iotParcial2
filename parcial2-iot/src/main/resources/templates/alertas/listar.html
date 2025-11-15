@@ -59,12 +59,45 @@
                     </select>
                 </div>
 
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Severidad</label>
+                    <select class="form-select" name="severidad">
+                        <option value="" th:selected="${severidad == null || severidad == ''}">Todas</option>
+                        <option th:each="s : ${severidades}" th:value="${s}" th:text="${s}"
+                                th:selected="${severidad != null and severidad.equals(s)}"></option>
+                    </select>
+                </div>
+
                 <div class="col-md-2">
-                    <button class="btn btn-primary w-100">
+                    <label class="form-label fw-semibold">Tamaño página</label>
+                    <select class="form-select" name="size">
+                        <option value="20" th:selected="${page != null and page.size==20}">20</option>
+                        <option value="50" th:selected="${page != null and page.size==50}">50</option>
+                        <option value="100" th:selected="${page != null and page.size==100}">100</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">
                         <i class="bi bi-funnel me-1"></i> Filtrar
                     </button>
                 </div>
+
+                <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check form-switch ms-sm-3 mt-3 mt-sm-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="autoRefreshSwitch">
+                        <label class="form-check-label" for="autoRefreshSwitch">Auto-actualizar cada 15s</label>
+                    </div>
+                </div>
             </form>
+            <div class="mt-2">
+                <a class="btn btn-outline-secondary btn-sm"
+                   th:href="${filtroId} != null ?
+                     @{|/alertas/export?filtroTipo=${filtroTipo}&id=${filtroId}&severidad=${severidad}|} :
+                     @{|/alertas/export?filtroTipo=${filtroTipo}&severidad=${severidad}|}">
+                    <i class="bi bi-download me-1"></i> Exportar CSV (24h)
+                </a>
+            </div>
         </section>
 
         <!-- TABLA DE ALERTAS -->
@@ -119,6 +152,84 @@
 <!-- jQuery + Nav logic -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script th:src="@{/js/nav/nav.js}" defer></script>
+<script>
+  (function(){
+    const key = 'alertas.autorefresh';
+    const sw = document.getElementById('autoRefreshSwitch');
+    let timer = null;
+    function start(){ if(timer) clearInterval(timer); timer = setInterval(()=>{ window.location.reload(); }, 15000); }
+    function stop(){ if(timer) { clearInterval(timer); timer=null; } }
+    try {
+      const saved = localStorage.getItem(key);
+      const on = saved === '1';
+      if (sw) {
+        sw.checked = on;
+        if (on) start();
+        sw.addEventListener('change', ()=>{
+          const val = sw.checked ? '1' : '0';
+          localStorage.setItem(key, val);
+          if (sw.checked) start(); else stop();
+        });
+      }
+    } catch(_){}
+  })();
+  // SSE de alertas: si hay filtro, lo usamos; si no, escuchamos todo
+  (function(){
+    try {
+      const tipo = /*[[${filtroTipo}]]*/ null;
+      const id = /*[[${filtroId}]]*/ null;
+      let url = '/sse/alertas';
+      if (tipo && id) url += `?tipo=${tipo}&id=${id}`;
+      const es = new EventSource(url);
+      // Indicador en vivo
+      let ind = document.getElementById('liveInd');
+      if (!ind) {
+        const hdr = document.querySelector('header .lead');
+        if (hdr) { const span = document.createElement('div'); span.className='small text-muted mt-1'; span.id='liveInd'; hdr.after(span); ind=span; }
+      }
+      const setIndicator = ok => { if (ind) ind.textContent = 'En vivo: ' + (ok ? 'conectado' : 'desconectado'); };
+      es.addEventListener('open', ()=>setIndicator(true));
+      es.addEventListener('error', ()=>setIndicator(false));
+      es.addEventListener('update', (ev) => {
+        try {
+          const a = JSON.parse(ev.data);
+          // Si hay filtro activo y no coincide, ignorar
+          if (tipo === 'regla' && a.reglaId !== id) return;
+          if (tipo === 'dispositivo' && a.dispositivoId !== id) return;
+          const tbody = document.querySelector('table tbody');
+          if (!tbody) return;
+          const tr = document.createElement('tr');
+          const tdTs = document.createElement('td');
+          const tdRg = document.createElement('td');
+          const tdDp = document.createElement('td');
+          const tdDt = document.createElement('td');
+          tdDt.innerHTML = '<pre class="mb-0 text-wrap small" style="white-space: pre-wrap;"></pre>';
+          const pre = tdDt.querySelector('pre');
+          // Fecha
+          const ts = new Date(a.ts);
+          const pad = n => (n<10?('0'+n):n);
+          tdTs.textContent = isNaN(ts) ? a.ts : (ts.getFullYear()+"-"+pad(ts.getMonth()+1)+"-"+pad(ts.getDate())+" "+pad(ts.getHours())+":"+pad(ts.getMinutes())+":"+pad(ts.getSeconds()));
+          tdRg.textContent = a.reglaNombre || '-';
+          tdDp.textContent = a.dispositivoNombre || '-';
+          pre.textContent = a.detallesJson || '{}';
+          tr.append(tdTs, tdRg, tdDp, tdDt);
+          // Insertar al principio
+          if (tbody.firstChild) tbody.insertBefore(tr, tbody.firstChild); else tbody.appendChild(tr);
+          tr.classList.add('flash-update');
+          setTimeout(()=>tr.classList.remove('flash-update'), 800);
+          // Trim al tamaño de página seleccionado
+          const sizeSel = document.querySelector('select[name="size"]');
+          const max = sizeSel ? parseInt(sizeSel.value || '50',10) : 50;
+          while (tbody.children.length > max) tbody.removeChild(tbody.lastChild);
+        } catch(_){}
+      });
+    } catch(_){}
+  })();
+</script>
+<style>
+  .flash-update { animation: flashBg 0.8s ease; }
+  @keyframes flashBg { from { background: rgba(255,220,200,.8);} to { background: transparent; } }
+</style>
 
 </body>
 </html>

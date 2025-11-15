@@ -26,4 +26,13 @@ public interface EstadoDispositivoRepository extends JpaRepository<EstadoDisposi
         WHERE d.id = :dispositivoId
         """)
     List<EstadoDispositivo> findByDispositivoIdWithJoins(@Param("dispositivoId") UUID dispositivoId);
+
+    @Query("""
+        SELECT e FROM EstadoDispositivo e
+        JOIN FETCH e.dispositivo d
+        JOIN FETCH e.variable v
+        WHERE d.id = :dispositivoId AND v.id = :variableId
+        """)
+    java.util.Optional<EstadoDispositivo> findOneWithJoins(@Param("dispositivoId") UUID dispositivoId,
+                                                           @Param("variableId") UUID variableId);
 }

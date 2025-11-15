@@ -22,6 +22,7 @@ public class AlertaServiceImpl implements AlertaService {
 
     private final AlertaRepository alertaRepo;
     private final ObjectMapper objectMapper;
+    private final com.unab.parcial2_iot.services.SseHub sseHub;
 
     @Override
     public Alerta crear(Dispositivo d, Regla r, Map<String, Object> detalles) {
@@ -32,18 +33,36 @@ public class AlertaServiceImpl implements AlertaService {
                 .ts(OffsetDateTime.now())
                 .detalles(detalles) // <-- Map, NO String
                 .build();
-        return alertaRepo.save(a);
+        a = alertaRepo.save(a);
+        try {
+            com.unab.parcial2_iot.dto.AlertaOut out = new com.unab.parcial2_iot.dto.AlertaOut(
+                    a.getId(),
+                    d.getId(), d.getNombre(),
+                    r.getId(), r.getNombre(),
+                    a.getTs(),
+                    safeJson(a.getDetalles())
+            );
+            sseHub.broadcastAlerta(out);
+        } catch (Exception ignored) {}
+        return a;
     }
 
     @Override
-    public Page<AlertaOut> listar(String filtroTipo, UUID id, Pageable pageable) {
+    public Page<AlertaOut> listar(String filtroTipo, UUID id, String severidad, Pageable pageable) {
         Page<Alerta> page;
+        boolean hasSev = severidad != null && !severidad.isBlank();
         if ("regla".equalsIgnoreCase(filtroTipo) && id != null) {
-            page = alertaRepo.findByRegla_IdOrderByTsDesc(id, pageable);
+            page = hasSev
+                    ? alertaRepo.findByRegla_IdAndRegla_SeveridadOrderByTsDesc(id, severidad, pageable)
+                    : alertaRepo.findByRegla_IdOrderByTsDesc(id, pageable);
         } else if ("dispositivo".equalsIgnoreCase(filtroTipo) && id != null) {
-            page = alertaRepo.findByDispositivo_IdOrderByTsDesc(id, pageable);
+            page = hasSev
+                    ? alertaRepo.findByDispositivo_IdAndRegla_SeveridadOrderByTsDesc(id, severidad, pageable)
+                    : alertaRepo.findByDispositivo_IdOrderByTsDesc(id, pageable);
         } else {
-            page = alertaRepo.findAllByOrderByTsDesc(pageable);
+            page = hasSev
+                    ? alertaRepo.findByRegla_SeveridadOrderByTsDesc(severidad, pageable)
+                    : alertaRepo.findAllByOrderByTsDesc(pageable);
         }
 
         return page.map(a -> new AlertaOut(

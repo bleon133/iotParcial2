@@ -74,4 +74,28 @@ public class TelemetriaController {
 
         return "telemetria/listar";
     }
+
+    @GetMapping(value = "/export", produces = "text/csv")
+    @ResponseBody
+    public String exportCsv(@RequestParam UUID dispositivoId,
+                            @RequestParam UUID variableId,
+                            @RequestParam(required = false) java.time.OffsetDateTime since,
+                            @RequestParam(required = false) java.time.OffsetDateTime until) {
+        if (since == null) since = java.time.OffsetDateTime.now().minusHours(24);
+        if (until == null) until = java.time.OffsetDateTime.now();
+        var rows = teleRepo.enRango(dispositivoId, variableId, since, until);
+        var sb = new StringBuilder();
+        sb.append("ts,valorNumero,valorBooleano,valorTexto,valorJson\n");
+        for (var r : rows) {
+            sb.append(r.getTs()).append(',')
+              .append(r.getValorNumero() == null ? "" : r.getValorNumero()).append(',')
+              .append(r.getValorBooleano() == null ? "" : r.getValorBooleano()).append(',')
+              .append(csv(r.getValorTexto())).append(',')
+              .append(csv(r.getValorJson()))
+              .append("\n");
+        }
+        return sb.toString();
+    }
+
+    private static String csv(String s) { if (s==null) return ""; return '"' + s.replace("\"","''") + '"'; }
 }
