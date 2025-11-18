@@ -23,6 +23,7 @@ public class AlertaServiceImpl implements AlertaService {
     private final AlertaRepository alertaRepo;
     private final ObjectMapper objectMapper;
     private final com.unab.parcial2_iot.services.SseHub sseHub;
+    private final com.unab.parcial2_iot.services.NotificationService notificationService;
 
     @Override
     public Alerta crear(Dispositivo d, Regla r, Map<String, Object> detalles) {
@@ -43,6 +44,7 @@ public class AlertaServiceImpl implements AlertaService {
                     safeJson(a.getDetalles())
             );
             sseHub.broadcastAlerta(out);
+            try { notificationService.notifyAlert(out); } catch (Exception ignored) {}
         } catch (Exception ignored) {}
         return a;
     }

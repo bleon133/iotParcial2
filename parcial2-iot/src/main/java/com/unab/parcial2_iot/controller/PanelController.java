@@ -53,12 +53,16 @@ public class PanelController {
 
     @PostMapping("/{id}/widgets")
     public String addWidget(@PathVariable UUID id,
-                            @RequestParam UUID dispositivoId,
-                            @RequestParam UUID variableId,
+                            @RequestParam(required = false) UUID dispositivoId,
+                            @RequestParam(required = false) UUID variableId,
                             @RequestParam(defaultValue = "line") String chartType,
                             @RequestParam(defaultValue = "24h") String rango,
                             @RequestParam(required = false) String titulo,
                             @RequestParam(required = false, defaultValue = "#0d6efd") String color) {
+        if (dispositivoId == null || variableId == null) {
+            // Faltan parámetros (p.ej., usuario no seleccionó variable). Volver a la vista del panel.
+            return "redirect:/paneles/{id}";
+        }
         var panel = panelRepo.findById(id).orElseThrow();
         var disp = dispositivoRepo.findById(dispositivoId).orElseThrow();
         var var = varRepo.findById(variableId).orElseThrow();
@@ -90,9 +94,10 @@ public class PanelController {
     @PostMapping("/{panelId}/widgets/{widgetId}/series")
     public String addSerie(@PathVariable UUID panelId,
                            @PathVariable UUID widgetId,
-                           @RequestParam UUID variableId,
+                           @RequestParam(required = false) UUID variableId,
                            @RequestParam(required = false) String color,
                            @RequestParam(required = false) String label) {
+        if (variableId == null) return "redirect:/paneles/{panelId}";
         var w = widgetRepo.findById(widgetId).orElseThrow();
         if (!w.getPanel().getId().equals(panelId)) return "redirect:/paneles/{panelId}";
         var var = varRepo.findById(variableId).orElseThrow();

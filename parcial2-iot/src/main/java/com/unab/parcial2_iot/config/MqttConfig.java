@@ -78,4 +78,25 @@ public class MqttConfig {
                 .handle(handler)
                 .get();
     }
+
+    @Bean
+    public IntegrationFlow mqttTwinReportedInboundFlow(MqttPahoClientFactory cf, com.unab.parcial2_iot.config.handlers.TwinReportedMqttHandler handler) {
+        String clientId = "api-twin-reported-" + UUID.randomUUID();
+        String[] topics;
+        if (props.getTwinReportedTopics() != null && !props.getTwinReportedTopics().isEmpty()) {
+            topics = props.getTwinReportedTopics().toArray(String[]::new);
+        } else {
+            topics = new String[]{"devices/+/twin/reported"};
+        }
+
+        var adapter = new MqttPahoMessageDrivenChannelAdapter(clientId, cf, topics);
+        var converter = new DefaultPahoMessageConverter(props.getQos(), false);
+        adapter.setConverter(converter);
+        adapter.setQos(props.getQos());
+        adapter.setAutoStartup(true);
+
+        return IntegrationFlow.from(adapter)
+                .handle(handler)
+                .get();
+    }
 }

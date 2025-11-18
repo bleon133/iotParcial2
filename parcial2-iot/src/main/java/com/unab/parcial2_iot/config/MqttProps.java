@@ -13,5 +13,6 @@ public class MqttProps {
     private String password;
     private List<String> inboundTopics;
     private List<String> ackTopics; // nuevos tópicos para ACK de comandos
+    private java.util.List<String> twinReportedTopics;
     private int qos = 1;
 }

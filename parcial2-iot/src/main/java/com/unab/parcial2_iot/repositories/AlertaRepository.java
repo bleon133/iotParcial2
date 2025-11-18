@@ -3,13 +3,19 @@ package com.unab.parcial2_iot.repositories;
 import com.unab.parcial2_iot.models.Alerta;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
 public interface AlertaRepository extends JpaRepository<Alerta, UUID> {
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_IdOrderByTsDesc(UUID reglaId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByDispositivo_IdOrderByTsDesc(UUID dispositivoId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findAllByOrderByTsDesc(Pageable pageable);
 
     long countByTsAfter(java.time.OffsetDateTime ts);
@@ -37,15 +43,31 @@ public interface AlertaRepository extends JpaRepository<Alerta, UUID> {
     java.util.List<DayCountRow> countByDaySince(java.time.OffsetDateTime since);
 
     // Filtros por severidad
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_SeveridadOrderByTsDesc(String severidad, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByDispositivo_IdAndRegla_SeveridadOrderByTsDesc(UUID dispositivoId, String severidad, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_IdAndRegla_SeveridadOrderByTsDesc(UUID reglaId, String severidad, Pageable pageable);
 
     // Rango temporal para export
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByTsBetweenOrderByTsDesc(java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_IdAndTsBetweenOrderByTsDesc(UUID reglaId, java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByDispositivo_IdAndTsBetweenOrderByTsDesc(UUID dispId, java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_SeveridadAndTsBetweenOrderByTsDesc(String severidad, java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByRegla_IdAndRegla_SeveridadAndTsBetweenOrderByTsDesc(UUID reglaId, String severidad, java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"dispositivo","regla"})
     Page<Alerta> findByDispositivo_IdAndRegla_SeveridadAndTsBetweenOrderByTsDesc(UUID dispId, String severidad, java.time.OffsetDateTime since, java.time.OffsetDateTime until, Pageable pageable);
 }

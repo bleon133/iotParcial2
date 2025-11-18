@@ -19,11 +19,13 @@ public class ReglaController {
 
     private final ReglaService reglaService;
     private final VariablePlantillaRepository varRepo;
+    private final com.unab.parcial2_iot.repositories.DispositivoRepository dispRepo;
 
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("reglas", reglaService.listarTodas());
         model.addAttribute("variables", varRepo.findAll());
+        model.addAttribute("dispositivos", dispRepo.findAll());
         model.addAttribute("form", new ReglaIn());
         model.addAttribute("nav", "reglas");
         return "reglas/listar";

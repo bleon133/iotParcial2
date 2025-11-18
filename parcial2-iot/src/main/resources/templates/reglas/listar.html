@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,7 @@
     <div class="container-fluid py-4">
         <header class="mb-4">
             <h1 class="fw-bold lh-1 mb-1" style="font-size:clamp(1.5rem, 3.5vw, 2.25rem);">
-                Gestión de Reglas
+                GestiÃ³n de Reglas
             </h1>
             <p class="lead text-secondary mb-0">
                 Crea, edita y administra las reglas de alertas basadas en variables IoT.
@@ -51,17 +51,31 @@
                             </thead>
                             <tbody>
                             <tr th:each="r : ${reglas}"
-                                th:attr="data-id=${r.id},data-variable=${r.variable != null ? r.variable.id : null},data-nombre=${r.nombre},data-expresion=${r.expresion},data-severidad=${r.severidad},data-habilitada=${r.habilitada},data-ventana=${r.ventanaSegundos}">
+                                th:attr="data-id=${r.id},
+                                          data-variable=${r.variable != null ? r.variable.id : null},
+                                          data-dispositivo=${r.dispositivo != null ? r.dispositivo.id : null},
+                                          data-tipo=${r.tipo},
+                                          data-highval=${r.config != null and r.config['high'] != null ? r.config['high']['value'] : null},
+                                          data-highsev=${r.config != null and r.config['high'] != null ? r.config['high']['severity'] : null},
+                                          data-lowval=${r.config != null and r.config['low'] != null ? r.config['low']['value'] : null},
+                                          data-lowsev=${r.config != null and r.config['low'] != null ? r.config['low']['severity'] : null},
+                                          data-normmin=${r.config != null and r.config['normal'] != null ? r.config['normal']['min'] : null},
+                                          data-normmax=${r.config != null and r.config['normal'] != null ? r.config['normal']['max'] : null},
+                                          data-nombre=${r.nombre},
+                                          data-expresion=${r.expresion},
+                                          data-severidad=${r.severidad},
+                                          data-habilitada=${r.habilitada},
+                                          data-ventana=${r.ventanaSegundos}">
                                 <td th:text="${r.nombre}"></td>
                                 <td th:text="${r.variable != null && r.variable.etiqueta != null
                                   ? r.variable.etiqueta
-                                  : (r.variable != null ? r.variable.nombre : '—')}">
+                                  : (r.variable != null ? r.variable.nombre : 'â€”')}">
                                 </td>
                                 <td th:text="${r.expresion}"></td>
                                 <td th:text="${r.severidad}"></td>
                                 <td th:text="${r.ventanaSegundos}"></td>
                                 <td>
-                                    <span th:text="${r.habilitada ? 'Sí' : 'No'}"
+                                    <span th:text="${r.habilitada ? 'SÃ­' : 'No'}"
                                           th:classappend="${r.habilitada} ? 'text-success fw-semibold' : 'text-danger fw-semibold'"></span>
                                 </td>
                                 <td class="text-center">
@@ -77,7 +91,7 @@
                                         </button>
                                     </form>
                                     <form th:action="@{|/reglas/${r.id}/eliminar|}" method="post"
-                                          onsubmit="return confirm('¿Eliminar regla?');" class="d-inline-block">
+                                          onsubmit="return confirm('Â¿Eliminar regla?');" class="d-inline-block">
                                         <button class="btn btn-sm btn-outline-danger" type="submit">
                                             <i class="bi bi-trash"></i> Eliminar
                                         </button>
@@ -108,14 +122,21 @@
                                     </option>
                                 </select>
                             </div>
-
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Nombre</label>
+                                <label class="form-label fw-semibold">Dispositivo (opcional)</label>
+                                <select class="form-select" name="dispositivoId">
+                                    <option value="">Todos los dispositivos de la plantilla</option>
+                                    <option th:each="d : ${dispositivos}" th:value="${d.id}" th:text="${d.nombre}"></option>
+                                </select>
+                                <div class="form-text">Si eliges uno, la regla solo aplica a ese dispositivo.</div>
+                            </div>
+
+                            <div class="mb-3" id="exprBlock"><label class="form-label fw-semibold">Nombre</label>
                                 <input class="form-control" name="nombre" required placeholder="Temperatura alta 5m"/>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Expresión</label>
+                                <label class="form-label fw-semibold">Expresión</label>bel>
                                 <input
                                         class="form-control"
                                         name="expresion"
@@ -124,7 +145,7 @@
                                         pattern="(avg|min|max)(?:_\d+(?:s|m|h))?\s*(>=|<=|>|<|==|=)\s*[+-]?\d+(?:\.\d+)?"
                                 />
                                 <div class="form-text">
-                                    Formato: <code>{avg|min|max}[_Ns|_Nm|_Nh]</code> <code>{operador}</code> <code>{número}</code><br/>
+                                    Formato: <code>{avg|min|max}[_Ns|_Nm|_Nh]</code> <code>{operador}</code> <code>{nÃºmero}</code><br/>
                                     Operadores permitidos: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>=</code>, <code>==</code><br/>
                                     Donde:
                                     <ul class="mb-1">
@@ -132,7 +153,7 @@
                                         <li><code>_Nm</code> = ventana de N minutos</li>
                                         <li><code>_Nh</code> = ventana de N horas</li>
                                     </ul>
-                                    Ejemplos válidos:
+                                    Ejemplos vÃ¡lidos:
                                     <code>avg &gt; 50</code>,
                                     <code>avg_5m &gt; 50</code>,
                                     <code>min &lt; 20</code>,
@@ -140,6 +161,20 @@
                                     <code>avg_30s &gt;= 10</code>,
                                     <code>max_1h &lt; 80</code>
                                 </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Modo bandas (opcional)</label>
+                                <div class="row g-2">
+                                  <div class="col-md-3"><label class="form-label small">Alto si &gt;</label><input class="form-control" name="bandsHighValue" type="number" step="any" /></div>
+                                  <div class="col-md-3"><label class="form-label small">Severidad alto</label><input class="form-control" name="bandsHighSeverity" placeholder="grave"/></div>
+                                  <div class="col-md-3"><label class="form-label small">Bajo si &lt;</label><input class="form-control" name="bandsLowValue" type="number" step="any"/></div>
+                                  <div class="col-md-3"><label class="form-label small">Severidad bajo</label><input class="form-control" name="bandsLowSeverity" placeholder="bajo"/></div>
+                                </div>
+                                <div class="row g-2 mt-1">
+                                  <div class="col-md-3"><label class="form-label small">Normal min</label><input class="form-control" name="bandsNormalMin" type="number" step="any"/></div>
+                                  <div class="col-md-3"><label class="form-label small">Normal max</label><input class="form-control" name="bandsNormalMax" type="number" step="any"/></div>
+                                  <div class="col-md-6"><div class="form-text">Si rellenas valores de bandas, el sistema usará modo "bands" (se crea alerta solo si NO es normal).</div></div>
+                                </div>
+                              </div>
                             </div>
 
                             <div class="mb-3">
@@ -151,7 +186,7 @@
                                 <label class="form-label fw-semibold">Ventana (segundos)</label>
                                 <input class="form-control" name="ventanaSegundos" type="number" value="300" min="1"/>
                                 <div class="form-text">
-                                    Si la expresión incluye _5m / _30s / _1h, este valor será ignorado.
+                                    Si la Expresión incluye _5m / _30s / _1h, este valor serÃ¡ ignorado.
                                 </div>
                             </div>
 
@@ -175,7 +210,7 @@
 <!-- Scripts base -->
 <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
 
-<!-- jQuery y lógica del nav -->
+<!-- jQuery y lÃ³gica del nav -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script th:src="@{/js/nav/nav.js}" defer></script>
 <script>
@@ -185,16 +220,26 @@
     const form = document.getElementById('reglaForm');
     const id = tr.getAttribute('data-id');
     const variable = tr.getAttribute('data-variable');
+    const dispositivo = tr.getAttribute('data-dispositivo');
+    const tipo = tr.getAttribute('data-tipo');
     const nombre = tr.getAttribute('data-nombre');
     const expresion = tr.getAttribute('data-expresion');
     const severidad = tr.getAttribute('data-severidad');
     const habilitada = tr.getAttribute('data-habilitada') === 'true';
     const ventana = tr.getAttribute('data-ventana');
+    const highVal = tr.getAttribute('data-highval');
+    const highSev = tr.getAttribute('data-highsev');
+    const lowVal = tr.getAttribute('data-lowval');
+    const lowSev = tr.getAttribute('data-lowsev');
+    const normMin = tr.getAttribute('data-normmin');
+    const normMax = tr.getAttribute('data-normmax');
     try {
       form.action = '/reglas/' + id;
       document.getElementById('reglaId').value = id;
       const selVar = form.querySelector('select[name="variableId"]');
       if(selVar) selVar.value = variable;
+      const selDisp = form.querySelector('select[name="dispositivoId"]');
+      if(selDisp) selDisp.value = dispositivo || '';
       const inNombre = form.querySelector('input[name="nombre"]');
       if(inNombre) inNombre.value = nombre;
       const inExpr = form.querySelector('input[name="expresion"]');
@@ -205,6 +250,13 @@
       if(inVent) inVent.value = ventana || 300;
       const chk = form.querySelector('input[name="habilitada"]');
       if(chk) chk.checked = habilitada;
+      // Prefill bandas si existen
+      const bhv = form.querySelector('input[name="bandsHighValue"]'); if(bhv) bhv.value = highVal || '';
+      const bhs = form.querySelector('input[name="bandsHighSeverity"]'); if(bhs) bhs.value = highSev || '';
+      const blv = form.querySelector('input[name="bandsLowValue"]'); if(blv) blv.value = lowVal || '';
+      const bls = form.querySelector('input[name="bandsLowSeverity"]'); if(bls) bls.value = lowSev || '';
+      const bnm = form.querySelector('input[name="bandsNormalMin"]'); if(bnm) bnm.value = normMin || '';
+      const bnx = form.querySelector('input[name="bandsNormalMax"]'); if(bnx) bnx.value = normMax || '';
       form.scrollIntoView({behavior:'smooth', block:'start'});
     } catch(_){}
   }
@@ -240,3 +292,39 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const exprBlock = document.getElementById('exprBlock') || document.querySelector('input[name="expresion"]').closest('.mb-3');
+    const bandsBlock = document.getElementById('bandsBlock') || document.querySelector('input[name="bandsHighValue"]').closest('.mb-3');
+    const exprInput = document.querySelector('input[name="expresion"]');
+    const bandsInputs = [
+      document.querySelector('input[name="bandsHighValue"]'),
+      document.querySelector('input[name="bandsLowValue"]'),
+      document.querySelector('input[name="bandsNormalMin"]'),
+      document.querySelector('input[name="bandsNormalMax"]')
+    ];
+    function isBandsFilled(){
+      return bandsInputs.some(i => i && i.value && i.value.toString().trim().length>0);
+    }
+    function toggle(){
+      const bandsOn = isBandsFilled();
+      if (bandsOn) {
+        if (exprBlock) exprBlock.style.display='none';
+        if (bandsBlock) bandsBlock.style.display='';
+        if (exprInput) exprInput.removeAttribute('required');
+      } else {
+        if (exprBlock) exprBlock.style.display='';
+        if (bandsBlock) bandsBlock.style.display='';
+      }
+    }
+    if (exprInput) exprInput.addEventListener('input', toggle);
+    bandsInputs.forEach(i => { if (i) i.addEventListener('input', toggle); });
+    toggle();
+  });
+</script>

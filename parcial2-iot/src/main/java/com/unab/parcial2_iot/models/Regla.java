@@ -2,8 +2,11 @@ package com.unab.parcial2_iot.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.OffsetDateTime;
+import java.util.Map;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
@@ -20,14 +23,19 @@ public class Regla {
     @JoinColumn(name = "variable_plantilla_id", nullable = false)
     private VariablePlantilla variable;
 
+    /** Opcional: limitar la regla a un dispositivo específico */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dispositivo_id")
+    private Dispositivo dispositivo;
+
     @Column(nullable = false)
     private String nombre;
 
-    /** Expresión evaluable por un job externo (p.ej., "avg_5m > 50") */
+    /** Expresión evaluable (modo 'expr'), p.ej. "avg_5m > 50" */
     @Column(nullable = false)
     private String expresion;
 
-    /** Severidad libre (info/warn/crit...) */
+    /** Severidad 'base' (info/warn/crit...). En modo 'bands' se calcula y va en detalles */
     private String severidad = "info";
 
     @Column(nullable = false)
@@ -38,4 +46,14 @@ public class Regla {
 
     @Column(name = "creada_en", nullable = false)
     private OffsetDateTime creadaEn;
+
+    /** Tipo de regla: 'expr' (por defecto) o 'bands' */
+    @Column(name = "tipo", nullable = false)
+    private String tipo = "expr";
+
+    /** Config JSON para modo 'bands' u otros */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "config", nullable = false)
+    private Map<String, Object> config;
 }
+

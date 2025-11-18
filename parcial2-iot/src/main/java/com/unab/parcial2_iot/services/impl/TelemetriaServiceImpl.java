@@ -17,6 +17,8 @@ import com.unab.parcial2_iot.services.TelemetriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -34,7 +36,11 @@ public class TelemetriaServiceImpl implements TelemetriaService {
     private final TelemetriaRepository telemetriaRepo;
     private final EstadoDispositivoRepository estadoRepo;
     private final SseHub sseHub;
+    private final com.unab.parcial2_iot.services.TelemetryRouter telemetryRouter;
     private final ObjectMapper objectMapper;
+    @PersistenceContext
+    private EntityManager entityManager;
+    private final com.unab.parcial2_iot.services.ReglaService reglaService;
 
     @Override
     public void registrarLectura(TelemetriaIn in) {
@@ -85,6 +91,9 @@ public class TelemetriaServiceImpl implements TelemetriaService {
 
         // 6) Guardar (trigger actualiza estado_dispositivo)
         telemetriaRepo.save(t);
+        try { entityManager.flush(); } catch (Exception ignored) {}
+        try { reglaService.evaluarPara(disp.getId(), var.getId()); } catch (Exception ignored) {}
+        try { telemetryRouter.route(t); } catch (Exception ignored) {}
 
         // 7) Notificar por SSE: estado y telemetría
         estadoRepo.findOneWithJoins(disp.getId(), var.getId()).ifPresent(e -> {

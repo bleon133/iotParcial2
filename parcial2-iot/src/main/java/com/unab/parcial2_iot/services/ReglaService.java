@@ -14,4 +14,7 @@ public interface ReglaService {
     List<Regla> listarHabilitadas();
 
     void evaluarReglas(); // llamado por @Scheduled
+
+    // Evaluación inmediata para un dispositivo/variable (para disparar alertas en ingesta)
+    void evaluarPara(java.util.UUID dispositivoId, java.util.UUID variableId);
 }

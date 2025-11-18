@@ -21,22 +21,24 @@
           <div class="col-12 col-md-3">
             <label class="form-label">Dispositivo</label>
             <select class="form-select" name="dispositivoId" id="dispSel" required>
+              <option value="" selected disabled>Seleccione...</option>
               <option th:each="d : ${dispositivos}" th:value="${d.id}" th:text="${d.nombre}"></option>
             </select>
           </div>
           <div class="col-12 col-md-3">
             <label class="form-label">Variable</label>
-            <div class="dropdown w-100" id="varDropdown">
-              <input type="hidden" name="variableId" id="variableIdHidden" />
-              <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="varSelectBtn">
-                <span id="varSelectLabel">Seleccioneâ€¦</span>
+              <div class="dropdown w-100" id="varDropdown">
+                <input type="hidden" name="variableId" id="variableIdHidden" />
+                <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="varSelectBtn" disabled>
+                <span id="varSelectLabel">Seleccione un dispositivo...</span>
                 <i class="bi bi-caret-down-fill"></i>
-              </button>
-              <div class="dropdown-menu p-2 w-100" style="max-height:280px;overflow:auto;">
-                <input type="text" class="form-control form-control-sm mb-2" placeholder="Buscar variable..." id="varSearchIn" />
-                <div id="varOptions"></div>
+                </button>
+                <div class="dropdown-menu p-2 w-100" style="max-height:280px;overflow:auto;">
+                  <input type="text" class="form-control form-control-sm mb-2" placeholder="Buscar variable..." id="varSearchIn" />
+                  <div id="varOptions"></div>
+                </div>
+                <div id="varError" class="form-text text-danger mt-1" style="display:none">Seleccione una variable.</div>
               </div>
-            </div>
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Tipo</label>
@@ -51,7 +53,7 @@
             <input class="form-control" type="color" name="color" value="#0d6efd"/>
           </div>
           <div class="col-12 col-md-1">
-            <button class="btn btn-primary w-100">Agregar</button>
+            <button class="btn btn-primary w-100" id="addBtn" type="submit" disabled>Agregar</button>
           </div>
         </form>
         <small class="text-muted">Nota: por ahora el grÃ¡fico espera variables numÃ©ricas.</small>
@@ -97,11 +99,17 @@
     const varSearchIn = document.getElementById('varSearchIn');
     const varLabel = document.getElementById('varSelectLabel');
     const varHidden = document.getElementById('variableIdHidden');
+    const varBtn = document.getElementById('varSelectBtn');
+    function setVarSelectorEnabled(enabled){
+      if (varBtn) varBtn.disabled = !enabled;
+      if (varSearchIn) varSearchIn.disabled = !enabled;
+    }
     async function loadVars(did){
       if (!did) return;
       try {
-        varOptions.innerHTML = '<div class="text-muted px-2">Cargandoâ€¦</div>';
+        varOptions.innerHTML = '<div class="text-muted px-2">Cargando...</div>';
         const res = await fetch(`/api/dispositivos/${did}/variables`);
+        if (!res.ok) throw new Error('HTTP '+res.status);
         const data = await res.json();
         varOptions.innerHTML = '';
         data.forEach(v=>{
@@ -109,13 +117,27 @@
           a.href = '#'; a.className='dropdown-item';
           a.dataset.id = v.id;
           a.textContent = v.etiqueta ? v.etiqueta : v.nombre;
-          a.addEventListener('click', (e)=>{ e.preventDefault(); varHidden.value = v.id; varLabel.textContent = a.textContent; });
+          a.addEventListener('click', (e)=>{ e.preventDefault(); varHidden.value = v.id; varLabel.textContent = a.textContent; updateAddEnabled(); });
           varOptions.appendChild(a);
         });
         if (varSearchIn) { varSearchIn.value=''; }
       } catch(_) { varOptions.innerHTML = '<div class="text-muted px-2">(sin variables)</div>'; }
     }
-    if (dispSel) { loadVars(dispSel.value); dispSel.addEventListener('change', e=>loadVars(e.target.value)); }
+    if (dispSel) {
+      if (dispSel.value) {
+        setVarSelectorEnabled(true);
+        loadVars(dispSel.value);
+      } else {
+        setVarSelectorEnabled(false);
+        if (varOptions) varOptions.innerHTML = '<div class="text-muted px-2">(seleccione un dispositivo)</div>';
+      }
+      dispSel.addEventListener('change', e=>{
+        setVarSelectorEnabled(true);
+        varHidden.value='';
+        varLabel.textContent='Seleccione...';
+        loadVars(e.target.value);
+      });
+    }
     if (varSearchIn) {
       varSearchIn.addEventListener('input', ()=>{
         const q = varSearchIn.value.toLowerCase();
@@ -123,6 +145,25 @@
           const txt = (item.textContent||'').toLowerCase();
           item.classList.toggle('d-none', q && !txt.includes(q));
         });
+      });
+    }
+    
+    // Validación inline y habilitado del botón Agregar
+    const addForm = document.querySelector('form[action$="/widgets"]');
+    const addBtn = document.getElementById('addBtn');
+    const varError = document.getElementById('varError');
+    function updateAddEnabled(){
+      const ok = !!(varHidden && varHidden.value);
+      if (addBtn) addBtn.disabled = !ok;
+      if (varError) varError.style.display = ok ? 'none' : 'block';
+    }
+    if (addForm) {
+      updateAddEnabled();
+      addForm.addEventListener('submit', (e)=>{
+        if (!varHidden || !varHidden.value) {
+          e.preventDefault();
+          updateAddEnabled();
+        }
       });
     }
 
@@ -238,12 +279,10 @@
 
     // Drag & Drop reordenar widgets con handle (solo permite arrastrar si viene del handle)
     function idFromCanvas(c){ return c.id.replace('w_',''); }
-    function idFromCanvas(c){ return c.id.replace('w_',''); }
     let dragSrc = null;
     // permitir arrastre solo si el usuario presionó el handle recientemente
     window.__dragHandlePressed = false;
     document.querySelectorAll('.widget-handle').forEach(h => { h.addEventListener('mousedown', ()=>{ window.__dragHandlePressed = true; setTimeout(()=> window.__dragHandlePressed=false, 500); }, {passive:true}); });
-    let dragSrc = null;
     document.querySelectorAll('.widget-col').forEach(col => {
       col.setAttribute('draggable','true');
       col.addEventListener('dragstart', (e)=>{
@@ -307,4 +346,3 @@
 </style>
 </body>
 </html>
-

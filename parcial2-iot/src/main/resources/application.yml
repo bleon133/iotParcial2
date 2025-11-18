@@ -8,4 +8,13 @@ app:
       - devices/+/telemetry/+
     ackTopics:
       - devices/+/commands/ack
+    twinReportedTopics:
+      - devices/+/twin/reported
     qos: 1
+  data:
+    retentionEnabled: true
+    retentionDays: 90
+    rollupsEnabled: true
+  notify:
+    enabled: false
+    webhookUrl: ""

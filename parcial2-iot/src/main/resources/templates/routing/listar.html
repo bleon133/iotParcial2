@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="~{components/bootstrap :: head-bootstrap}"></th:block>
+  <link rel="stylesheet" th:href="@{/css/base/glasslight.css}">
+  <title>Routing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+ </head>
+ <body>
+ <div th:replace="~{components/sidebar :: sidebar}"></div>
+ <main class="app-content">
+  <div class="container-fluid py-4">
+    <header class="mb-3">
+      <h1 class="fw-bold">Routing de Telemetría</h1>
+      <p class="text-muted">Crea reglas para enviar telemetría a webhooks u otros sinks.</p>
+    </header>
+
+    <section class="row g-3">
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header">Nueva regla</div>
+          <div class="card-body">
+            <form method="post" th:action="@{/routing}">
+              <div class="mb-2">
+                <label class="form-label">Nombre</label>
+                <input class="form-control" name="nombre" placeholder="to-webhook"/>
+              </div>
+              <div class="mb-2 row g-2">
+                <div class="col-6">
+                  <label class="form-label">Sink</label>
+                  <select class="form-select" name="sink">
+                    <option value="webhook">webhook</option>
+                  </select>
+                </div>
+                <div class="col-6 d-flex align-items-end">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="enabled" checked id="enabledChk"/>
+                    <label class="form-check-label" for="enabledChk">Habilitada</label>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Match (JSON)</label>
+                <textarea class="form-control" name="matchJson" rows="4" placeholder='{"variableId":"UUID"}'></textarea>
+                <div class="form-text">Campos soportados: dispositivoId, variableId, tipoDato</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Config (JSON)</label>
+                <textarea class="form-control" name="configJson" rows="4" placeholder='{"url":"https://mi-webhook/telemetry","headers":{"X-Auth":"abc"}}'></textarea>
+              </div>
+              <div th:if="${error}" class="alert alert-danger py-2" th:text="${error}"></div>
+              <button class="btn btn-primary">Crear</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header">Reglas</div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead>
+                  <tr><th>Nombre</th><th>Sink</th><th>Enabled</th><th>Match</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                  <tr th:each="r : ${rules}">
+                    <td th:text="${r.nombre}">rule</td>
+                    <td th:text="${r.sink}">webhook</td>
+                    <td>
+                      <span th:if="${r.enabled}" class="badge text-bg-success">sí</span>
+                      <span th:if="${!r.enabled}" class="badge text-bg-secondary">no</span>
+                    </td>
+                    <td><code th:text="${#strings.abbreviate(r.match, 60)}"></code></td>
+                    <td>
+                      <form th:action="@{|/routing/${r.id}/eliminar|}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar regla?')">
+                        <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                      </form>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(rules)}"><td colspan="5" class="text-muted">Sin reglas.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+ </main>
+ <th:block th:replace="~{components/bootstrap :: scripts-bootstrap}"></th:block>
+ </body>
+ </html>
+
